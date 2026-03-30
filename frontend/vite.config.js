@@ -17,23 +17,13 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     sourcemap: false,
-    minify: 'terser',
     rollupOptions: {
       output: {
-        manualChunks: {
-          // Separar librerías grandes para mejor rendimiento
-          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
-          'mui-vendor': ['@mui/material', '@mui/icons-material', '@emotion/react', '@emotion/styled'],
-          'calendar-vendor': ['@fullcalendar/react', '@fullcalendar/daygrid', '@fullcalendar/timegrid'],
-          'data-vendor': ['@mui/x-data-grid', '@tanstack/react-query'],
-        }
+        // Simplificar - sin manualChunks complicados
+        assetFileNames: 'assets/[name].[hash][extname]',
+        chunkFileNames: 'assets/[name].[hash].js',
+        entryFileNames: 'assets/[name].[hash].js',
       }
-    },
-    // Optimizar chunks
-    chunkSizeWarningLimit: 1000,
-  },
-  // Optimizar dependencias
-  optimizeDeps: {
-    include: ['react', 'react-dom', 'react-router-dom', '@mui/material', 'axios']
+    }
   }
 })
