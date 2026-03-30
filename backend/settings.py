@@ -47,7 +47,7 @@ INSTALLED_APPS = [
     'grades',
     'videocalls',
     'notifications',
-    'logs',
+    # 'logs',
 ]
 
 MIDDLEWARE = [
