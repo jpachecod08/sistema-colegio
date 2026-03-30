@@ -7,7 +7,6 @@ dist/
 .vite/
 .env
 *.log
-logs/
 .DS_Store
 .vscode/
 .idea/
