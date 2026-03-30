@@ -1,0 +1,13 @@
+﻿venv/
+venv_guardado/
+__pycache__/
+*.pyc
+node_modules/
+dist/
+.vite/
+.env
+*.log
+logs/
+.DS_Store
+.vscode/
+.idea/
