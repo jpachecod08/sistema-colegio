@@ -5,6 +5,7 @@ from .serializers import UserLogSerializer
 class UserLogViewSet(viewsets.ModelViewSet):
     serializer_class = UserLogSerializer
     permission_classes = [permissions.IsAuthenticated]
+    queryset = UserLog.objects.all()  # <-- AGREGAR ESTA L?NEA
     
     def get_queryset(self):
         user = self.request.user
