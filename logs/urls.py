@@ -1,7 +1,10 @@
-﻿from django.urls import path
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
 from . import views
 
+router = DefaultRouter()
+router.register(r'logs', views.UserLogViewSet)
+
 urlpatterns = [
-    path('', views.UserLogViewSet.as_view({'get': 'list', 'post': 'create'}), name='logs-list'),
-    path('<int:pk>/', views.UserLogViewSet.as_view({'get': 'retrieve', 'put': 'update', 'delete': 'destroy'}), name='logs-detail'),
+    path('', include(router.urls)),
 ]

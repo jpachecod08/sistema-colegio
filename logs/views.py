@@ -1,38 +1,16 @@
-# logs/views.py
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
-from django.utils import timezone
-from datetime import timedelta
-from .models import Log
-from .serializers import LogSerializer
+from rest_framework import viewsets, permissions
+from .models import UserLog
+from .serializers import UserLogSerializer
 
-class RecentActivityView(APIView):
-    permission_classes = [IsAuthenticated]
+class UserLogViewSet(viewsets.ModelViewSet):
+    serializer_class = UserLogSerializer
+    permission_classes = [permissions.IsAuthenticated]
     
-    def get(self, request):
-        try:
-            # Intentar obtener logs reales
-            recent_logs = Log.objects.all()[:10]
-            serializer = LogSerializer(recent_logs, many=True)
-            return Response(serializer.data)
-        except Exception as e:
-            print(f"Error fetching logs: {e}")
-            # Si hay error, retornar datos de ejemplo
-            activities = [
-                {
-                    'id': 1,
-                    'title': 'Nuevo usuario registrado',
-                    'time': 'Hace 2 horas',
-                    'tag': 'Usuario',
-                    'type': 'user'
-                },
-                {
-                    'id': 2,
-                    'title': 'Nueva clase creada',
-                    'time': 'Hace 5 horas',
-                    'tag': 'Clase',
-                    'type': 'class'
-                }
-            ]
-            return Response(activities)
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_superuser:
+            return UserLog.objects.all()
+        return UserLog.objects.filter(user=user)
+    
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
