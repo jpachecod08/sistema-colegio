@@ -1,0 +1,28 @@
+# Crear archivo render.yaml
+echo "services:
+  - type: web
+    name: sistema-colegio-backend
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: cd backend && gunicorn backend.asgi:application -k uvicorn.workers.UvicornWorker
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: backend.settings
+      - key: DATABASE_URL
+        fromDatabase:
+          name: sistema-colegio-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ALLOWED_HOSTS
+        value: .onrender.com
+      - key: CORS_ALLOWED_ORIGINS
+        value: https://sistema-colegio.netlify.app
+    autoDeploy: true
+
+  - type: postgresql
+    name: sistema-colegio-db
+    plan: free
+    ipAllowList: [] # solo permitir conexiones internas
+" > render.yaml
