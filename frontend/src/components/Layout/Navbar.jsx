@@ -56,22 +56,21 @@ const Navbar = ({ onMenuClick }) => {
     }
   }
 
-  // Obtener el nombre a mostrar (prioriza nombre real, luego username)
-  const getDisplayName = () => {
+  // Obtener el nombre del usuario (nombre real o username)
+  const getUserName = () => {
     if (user?.first_name && user?.last_name) {
       return `${user.first_name} ${user.last_name}`
     }
     if (user?.first_name) {
       return user.first_name
     }
-    // Si no tiene nombre real, mostrar el username pero NO mostrar el chip de rol separado
     return user?.username || 'Usuario'
   }
 
-  const getShortDisplayName = () => {
-    const fullName = getDisplayName()
-    if (fullName.length > 15) {
-      return fullName.substring(0, 12) + '...'
+  const getShortUserName = () => {
+    const fullName = getUserName()
+    if (fullName.length > 12) {
+      return fullName.substring(0, 10) + '...'
     }
     return fullName
   }
@@ -84,14 +83,6 @@ const Navbar = ({ onMenuClick }) => {
       return user.first_name[0].toUpperCase()
     }
     return user?.username?.[0]?.toUpperCase() || 'U'
-  }
-
-  // Determinar si debe mostrar el chip de rol
-  // Solo mostrar el chip si el usuario tiene nombre real (para no duplicar información)
-  const shouldShowRoleChip = () => {
-    // Si el usuario tiene nombre y apellido, mostramos el chip
-    // Si solo tiene username, NO mostramos el chip porque ya se ve en el nombre
-    return user?.first_name && user?.last_name
   }
 
   const handleMenu = (event) => {
@@ -201,8 +192,23 @@ const Navbar = ({ onMenuClick }) => {
             alignItems: 'center', 
             gap: { xs: 1, sm: 2 }
           }}>
-            {/* Nombre del usuario - responsivo */}
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            {/* Chip de rol - SIEMPRE se muestra */}
+            <Chip
+              label={getRoleName()}
+              color={getRoleColor()}
+              size="small"
+              sx={{ 
+                fontWeight: 'bold',
+                fontSize: { xs: 10, sm: 11, md: 12 },
+                height: { xs: 24, sm: 28 },
+                '& .MuiChip-label': { 
+                  px: { xs: 1, sm: 1.5 }
+                }
+              }}
+            />
+            
+            {/* Nombre del usuario - solo en desktop/tablet, en móvil se muestra en el avatar */}
+            {!isMobile && (
               <Typography 
                 variant="body2" 
                 sx={{ 
@@ -215,28 +221,11 @@ const Navbar = ({ onMenuClick }) => {
                   whiteSpace: 'nowrap'
                 }}
               >
-                {isMobile ? getShortDisplayName() : getDisplayName()}
+                {getUserName()}
               </Typography>
-            </Box>
-            
-            {/* Chip de rol - solo mostrar si el usuario tiene nombre real */}
-            {shouldShowRoleChip() && (
-              <Chip
-                label={getRoleName()}
-                color={getRoleColor()}
-                size="small"
-                sx={{ 
-                  fontWeight: 'bold',
-                  fontSize: { xs: 10, sm: 11, md: 12 },
-                  height: { xs: 24, sm: 28 },
-                  '& .MuiChip-label': { 
-                    px: { xs: 1, sm: 1.5 }
-                  }
-                }}
-              />
             )}
             
-            <Tooltip title="Perfil">
+            <Tooltip title={isMobile ? getUserName() : "Perfil"}>
               <IconButton onClick={handleMenu} size="small">
                 <Avatar sx={{ 
                   bgcolor: 'secondary.main', 
