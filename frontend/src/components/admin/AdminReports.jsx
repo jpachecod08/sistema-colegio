@@ -16,13 +16,19 @@ import {
   Select,
   MenuItem,
   FormControl,
-  InputLabel
+  InputLabel,
+  useMediaQuery,
+  useTheme
 } from '@mui/material'
 import { ArrowBack, PictureAsPdf, Download, Assessment } from '@mui/icons-material'
 import api from '../../services/api'
 
 const AdminReports = () => {
   const navigate = useNavigate()
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
+  const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'))
+  
   const [loading, setLoading] = useState(false)
   const [generating, setGenerating] = useState(false)
   const [error, setError] = useState('')
@@ -105,7 +111,7 @@ const AdminReports = () => {
       id: 'general',
       title: 'Reporte General',
       description: 'Estadísticas generales del sistema',
-      icon: <Assessment sx={{ fontSize: 40 }} />,
+      icon: <Assessment sx={{ fontSize: { xs: 32, sm: 36, md: 40 } }} />,
       color: '#6C63FF',
       hasFilters: false
     },
@@ -113,7 +119,7 @@ const AdminReports = () => {
       id: 'grades',
       title: 'Reporte de Calificaciones',
       description: 'Calificaciones por clase y periodo',
-      icon: <Assessment sx={{ fontSize: 40 }} />,
+      icon: <Assessment sx={{ fontSize: { xs: 32, sm: 36, md: 40 } }} />,
       color: '#4ECDC4',
       hasFilters: true
     },
@@ -121,7 +127,7 @@ const AdminReports = () => {
       id: 'attendance',
       title: 'Reporte de Asistencia',
       description: 'Asistencia por clase',
-      icon: <Assessment sx={{ fontSize: 40 }} />,
+      icon: <Assessment sx={{ fontSize: { xs: 32, sm: 36, md: 40 } }} />,
       color: '#F59E0B',
       hasFilters: true
     },
@@ -129,7 +135,7 @@ const AdminReports = () => {
       id: 'students',
       title: 'Listado de Estudiantes',
       description: 'Lista completa de estudiantes',
-      icon: <Assessment sx={{ fontSize: 40 }} />,
+      icon: <Assessment sx={{ fontSize: { xs: 32, sm: 36, md: 40 } }} />,
       color: '#10B981',
       hasFilters: false
     }
@@ -144,103 +150,161 @@ const AdminReports = () => {
   }
 
   return (
-    <Box sx={{ p: 3 }}>
-      {/* Header */}
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
+    <Box sx={{ 
+      p: { xs: 1.5, sm: 2, md: 3 },
+      maxWidth: '100%',
+      overflowX: 'hidden'
+    }}>
+      {/* Header Responsive */}
+      <Box sx={{ 
+        display: 'flex', 
+        flexDirection: { xs: 'column', sm: 'row' },
+        alignItems: { xs: 'flex-start', sm: 'center' }, 
+        gap: { xs: 2, sm: 2 },
+        mb: { xs: 2, sm: 3 }
+      }}>
         <Button 
           variant="outlined" 
           onClick={() => navigate('/admin')}
           startIcon={<ArrowBack />}
-          sx={{ borderRadius: '8px' }}
+          sx={{ 
+            borderRadius: '8px',
+            px: { xs: 1.5, sm: 2 },
+            py: { xs: 0.5, sm: 0.75 },
+            fontSize: { xs: 12, sm: 13 }
+          }}
         >
           Volver
         </Button>
-        <Typography variant="h4" sx={{ fontFamily: '"Instrument Serif", serif' }}>
+        <Typography 
+          variant="h4" 
+          sx={{ 
+            fontFamily: '"Instrument Serif", serif',
+            fontSize: { xs: 20, sm: 28, md: 32 }
+          }}
+        >
           Generación de Reportes
         </Typography>
       </Box>
 
       {error && (
-        <Alert severity="error" onClose={() => setError('')} sx={{ mb: 2, borderRadius: '10px' }}>
+        <Alert 
+          severity="error" 
+          onClose={() => setError('')} 
+          sx={{ 
+            mb: 2, 
+            borderRadius: '10px', 
+            fontSize: { xs: 12, sm: 13 } 
+          }}
+        >
           {error}
         </Alert>
       )}
 
-      {/* Filtros para reportes que los requieren */}
-      <Paper sx={{ p: 3, mb: 3, borderRadius: '14px', border: '0.5px solid #E0DDD8' }}>
-        <Typography variant="h6" sx={{ mb: 2 }}>
+      {/* Filtros Responsive */}
+      <Paper sx={{ 
+        p: { xs: 2, sm: 3 }, 
+        mb: { xs: 2, sm: 3 }, 
+        borderRadius: '14px', 
+        border: '0.5px solid #E0DDD8' 
+      }}>
+        <Typography variant="h6" sx={{ 
+          mb: 2, 
+          fontSize: { xs: 16, sm: 18, md: 20 } 
+        }}>
           Filtros
         </Typography>
         <Grid container spacing={2}>
           <Grid item xs={12} md={6}>
             <FormControl fullWidth size="small">
-              <InputLabel>Clase/Grado</InputLabel>
+              <InputLabel sx={{ fontSize: { xs: 12, sm: 13 } }}>Clase/Grado</InputLabel>
               <Select
                 value={selectedClass}
                 onChange={(e) => setSelectedClass(e.target.value)}
                 label="Clase/Grado"
+                sx={{ fontSize: { xs: 12, sm: 13 } }}
               >
-                <MenuItem value="">Todas</MenuItem>
+                <MenuItem value="" sx={{ fontSize: { xs: 12, sm: 13 } }}>Todas</MenuItem>
                 {classes.map((cls) => (
-                  <MenuItem key={cls.id} value={cls.id}>{cls.name}</MenuItem>
+                  <MenuItem key={cls.id} value={cls.id} sx={{ fontSize: { xs: 12, sm: 13 } }}>
+                    {cls.name}
+                  </MenuItem>
                 ))}
               </Select>
             </FormControl>
           </Grid>
           <Grid item xs={12} md={6}>
             <FormControl fullWidth size="small">
-              <InputLabel>Periodo</InputLabel>
+              <InputLabel sx={{ fontSize: { xs: 12, sm: 13 } }}>Periodo</InputLabel>
               <Select
                 value={selectedPeriod}
                 onChange={(e) => setSelectedPeriod(e.target.value)}
                 label="Periodo"
+                sx={{ fontSize: { xs: 12, sm: 13 } }}
               >
-                <MenuItem value="">Todos</MenuItem>
-                <MenuItem value="1">Periodo 1</MenuItem>
-                <MenuItem value="2">Periodo 2</MenuItem>
-                <MenuItem value="3">Periodo 3</MenuItem>
-                <MenuItem value="4">Periodo 4</MenuItem>
+                <MenuItem value="" sx={{ fontSize: { xs: 12, sm: 13 } }}>Todos</MenuItem>
+                <MenuItem value="1" sx={{ fontSize: { xs: 12, sm: 13 } }}>Periodo 1</MenuItem>
+                <MenuItem value="2" sx={{ fontSize: { xs: 12, sm: 13 } }}>Periodo 2</MenuItem>
+                <MenuItem value="3" sx={{ fontSize: { xs: 12, sm: 13 } }}>Periodo 3</MenuItem>
+                <MenuItem value="4" sx={{ fontSize: { xs: 12, sm: 13 } }}>Periodo 4</MenuItem>
               </Select>
             </FormControl>
           </Grid>
         </Grid>
       </Paper>
 
-      {/* Grid de reportes */}
-      <Grid container spacing={3}>
+      {/* Grid de reportes Responsive */}
+      <Grid container spacing={{ xs: 2, sm: 3 }}>
         {reports.map((report) => (
           <Grid item xs={12} sm={6} md={3} key={report.id}>
             <Card sx={{ 
               borderRadius: '14px', 
               border: '0.5px solid #E0DDD8',
               transition: 'transform 0.2s, box-shadow 0.2s',
+              height: '100%',
+              display: 'flex',
+              flexDirection: 'column',
               '&:hover': {
-                transform: 'translateY(-4px)',
-                boxShadow: '0 8px 24px rgba(0,0,0,0.1)'
+                transform: { xs: 'none', sm: 'translateY(-4px)' },
+                boxShadow: { sm: '0 8px 24px rgba(0,0,0,0.1)' }
               }
             }}>
-              <CardContent sx={{ textAlign: 'center', py: 3 }}>
+              <CardContent sx={{ 
+                textAlign: 'center', 
+                py: { xs: 2, sm: 2.5, md: 3 },
+                flex: 1
+              }}>
                 <Box sx={{ color: report.color, mb: 2 }}>
                   {report.icon}
                 </Box>
-                <Typography variant="h6" sx={{ fontWeight: 500 }}>
+                <Typography variant="h6" sx={{ 
+                  fontWeight: 500, 
+                  fontSize: { xs: 16, sm: 18, md: 20 } 
+                }}>
                   {report.title}
                 </Typography>
-                <Typography variant="body2" sx={{ color: '#888', mt: 1 }}>
+                <Typography variant="body2" sx={{ 
+                  color: '#888', 
+                  mt: 1,
+                  fontSize: { xs: 11, sm: 12, md: 13 }
+                }}>
                   {report.description}
                 </Typography>
               </CardContent>
-              <CardActions sx={{ justifyContent: 'center', pb: 2 }}>
+              <CardActions sx={{ justifyContent: 'center', pb: { xs: 2, sm: 2.5 } }}>
                 <Button
                   variant="contained"
-                  startIcon={<Download />}
+                  startIcon={<Download sx={{ fontSize: { xs: 16, sm: 18 } }} />}
                   onClick={() => generateReport(report.id)}
                   disabled={generating}
                   sx={{
                     background: `linear-gradient(135deg, ${report.color} 0%, ${report.color}CC 100%)`,
                     '&:hover': { opacity: 0.9 },
                     borderRadius: '8px',
-                    textTransform: 'none'
+                    textTransform: 'none',
+                    fontSize: { xs: 11, sm: 12, md: 13 },
+                    px: { xs: 2, sm: 2.5 },
+                    py: { xs: 0.5, sm: 0.75 }
                   }}
                 >
                   {generating ? 'Generando...' : 'Generar PDF'}
@@ -257,7 +321,11 @@ const AdminReports = () => {
         onClose={() => setSuccess('')}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
-        <Alert severity="success" onClose={() => setSuccess('')} sx={{ borderRadius: '10px' }}>
+        <Alert 
+          severity="success" 
+          onClose={() => setSuccess('')} 
+          sx={{ borderRadius: '10px', fontSize: { xs: 12, sm: 13 } }}
+        >
           {success}
         </Alert>
       </Snackbar>

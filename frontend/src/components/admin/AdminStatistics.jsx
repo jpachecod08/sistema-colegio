@@ -11,13 +11,32 @@ import {
   Alert,
   Card,
   CardContent,
-  Divider
+  Divider,
+  useMediaQuery,
+  useTheme
 } from '@mui/material'
-import { ArrowBack, BarChart, PieChart, TrendingUp, People, School, Grade } from '@mui/icons-material'
+import { 
+  ArrowBack, 
+  BarChart, 
+  PieChart, 
+  TrendingUp, 
+  People, 
+  School, 
+  Grade,
+  Book,
+  TrendingDown,
+  EventNote,
+  CheckCircle,
+  Cancel
+} from '@mui/icons-material'
 import api from '../../services/api'
 
 const AdminStatistics = () => {
   const navigate = useNavigate()
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
+  const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'))
+  
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [stats, setStats] = useState({
@@ -46,35 +65,30 @@ const AdminStatistics = () => {
     try {
       setLoading(true)
       
-      // Obtener usuarios
       let users = []
       try {
         const r = await api.get('/users/list/')
         users = extractDataFromResponse(r)
       } catch(e) { console.error('Error fetching users:', e) }
       
-      // Obtener clases
       let classes = []
       try {
         const r = await api.get('/academics/grades/')
         classes = extractDataFromResponse(r)
       } catch(e) { console.error('Error fetching classes:', e) }
       
-      // Obtener materias
       let subjects = []
       try {
         const r = await api.get('/academics/subjects/')
         subjects = extractDataFromResponse(r)
       } catch(e) { console.error('Error fetching subjects:', e) }
       
-      // Obtener estadísticas de calificaciones
       let gradesStats = { passing: 0, failing: 0, average: 0 }
       try {
         const r = await api.get('/grades/stats/')
         gradesStats = r.data || { passing: 0, failing: 0, average: 0 }
       } catch(e) { console.error('Error fetching grades stats:', e) }
       
-      // Obtener estadísticas de asistencia
       let attendanceStats = { total: 0, present: 0, absent: 0, late: 0 }
       try {
         const r = await api.get('/attendance/stats/')
@@ -125,29 +139,73 @@ const AdminStatistics = () => {
     <Card sx={{ 
       borderRadius: '14px', 
       border: '0.5px solid #E0DDD8',
-      height: '100%'
+      height: '100%',
+      transition: 'transform 0.2s, box-shadow 0.2s',
+      '&:hover': {
+        transform: { xs: 'none', sm: 'translateY(-2px)' },
+        boxShadow: { sm: '0 4px 12px rgba(0,0,0,0.05)' }
+      }
     }}>
-      <CardContent>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-          <Box>
-            <Typography variant="body2" sx={{ color: '#888', mb: 1 }}>
+      <CardContent sx={{ p: { xs: 1.5, sm: 2 } }}>
+        <Box sx={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'flex-start',
+          gap: 1
+        }}>
+          <Box sx={{ flex: 1, minWidth: 0 }}>
+            <Typography variant="body2" sx={{ 
+              color: '#888', 
+              mb: 1,
+              fontSize: { xs: 11, sm: 12, md: 13 }
+            }}>
               {title}
             </Typography>
-            <Typography variant="h3" sx={{ fontFamily: '"Instrument Serif", serif', color }}>
+            <Typography variant="h3" sx={{ 
+              fontFamily: '"Instrument Serif", serif', 
+              color,
+              fontSize: { xs: 28, sm: 32, md: 40 },
+              lineHeight: 1,
+              wordBreak: 'break-word'
+            }}>
               {value}
             </Typography>
             {subtitle && (
-              <Typography variant="caption" sx={{ color: '#AAA', mt: 1, display: 'block' }}>
+              <Typography variant="caption" sx={{ 
+                color: '#AAA', 
+                mt: 1, 
+                display: 'block',
+                fontSize: { xs: 9, sm: 10, md: 11 }
+              }}>
                 {subtitle}
               </Typography>
             )}
           </Box>
-          <Box sx={{ color, opacity: 0.7 }}>
-            {icon}
+          <Box sx={{ 
+            color, 
+            opacity: 0.7,
+            flexShrink: 0
+          }}>
+            {React.cloneElement(icon, { 
+              sx: { fontSize: { xs: 28, sm: 32, md: 36 } }
+            })}
           </Box>
         </Box>
       </CardContent>
     </Card>
+  )
+
+  const SectionTitle = ({ icon, title }) => (
+    <Typography variant="h6" sx={{ 
+      mb: { xs: 1.5, sm: 2 }, 
+      display: 'flex', 
+      alignItems: 'center', 
+      gap: 1,
+      fontSize: { xs: 16, sm: 18, md: 20 }
+    }}>
+      {React.cloneElement(icon, { sx: { fontSize: { xs: 18, sm: 20 } } })}
+      {title}
+    </Typography>
   )
 
   if (loading) {
@@ -159,127 +217,146 @@ const AdminStatistics = () => {
   }
 
   return (
-    <Box sx={{ p: 3 }}>
-      {/* Header */}
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
+    <Box sx={{ 
+      p: { xs: 1.5, sm: 2, md: 3 },
+      maxWidth: '100%',
+      overflowX: 'hidden'
+    }}>
+      {/* Header Responsive */}
+      <Box sx={{ 
+        display: 'flex', 
+        flexDirection: { xs: 'column', sm: 'row' },
+        alignItems: { xs: 'flex-start', sm: 'center' }, 
+        gap: { xs: 2, sm: 2 },
+        mb: { xs: 2, sm: 3 }
+      }}>
         <Button 
           variant="outlined" 
           onClick={() => navigate('/admin')}
           startIcon={<ArrowBack />}
-          sx={{ borderRadius: '8px' }}
+          sx={{ 
+            borderRadius: '8px',
+            px: { xs: 1.5, sm: 2 },
+            py: { xs: 0.5, sm: 0.75 },
+            fontSize: { xs: 12, sm: 13 }
+          }}
         >
           Volver
         </Button>
-        <Typography variant="h4" sx={{ fontFamily: '"Instrument Serif", serif' }}>
+        <Typography 
+          variant="h4" 
+          sx={{ 
+            fontFamily: '"Instrument Serif", serif',
+            fontSize: { xs: 20, sm: 28, md: 32 }
+          }}
+        >
           Estadísticas del Sistema
         </Typography>
       </Box>
 
       {error && (
-        <Alert severity="error" onClose={() => setError('')} sx={{ mb: 2, borderRadius: '10px' }}>
+        <Alert 
+          severity="error" 
+          onClose={() => setError('')} 
+          sx={{ 
+            mb: 2, 
+            borderRadius: '10px',
+            fontSize: { xs: 12, sm: 13 }
+          }}
+        >
           {error}
         </Alert>
       )}
 
       {/* Usuarios */}
-      <Typography variant="h6" sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
-        <People sx={{ fontSize: 20 }} />
-        Usuarios
-      </Typography>
-      <Grid container spacing={2} sx={{ mb: 4 }}>
+      <SectionTitle icon={<People />} title="Usuarios" />
+      <Grid container spacing={{ xs: 1, sm: 1.5, md: 2 }} sx={{ mb: { xs: 3, sm: 4 } }}>
         <Grid item xs={6} sm={4} md={2.4}>
-          <StatCard title="Total" value={stats.users.total} icon={<People fontSize="large" />} color="#1A1A2E" />
+          <StatCard title="Total" value={stats.users.total} icon={<People />} color="#1A1A2E" />
         </Grid>
         <Grid item xs={6} sm={4} md={2.4}>
-          <StatCard title="Administradores" value={stats.users.admins} icon={<People fontSize="large" />} color="#EF4444" />
+          <StatCard title="Administradores" value={stats.users.admins} icon={<People />} color="#EF4444" />
         </Grid>
         <Grid item xs={6} sm={4} md={2.4}>
-          <StatCard title="Profesores" value={stats.users.teachers} icon={<School fontSize="large" />} color="#6C63FF" />
+          <StatCard title="Profesores" value={stats.users.teachers} icon={<School />} color="#6C63FF" />
         </Grid>
         <Grid item xs={6} sm={4} md={2.4}>
-          <StatCard title="Estudiantes" value={stats.users.students} icon={<Grade fontSize="large" />} color="#4ECDC4" />
+          <StatCard title="Estudiantes" value={stats.users.students} icon={<Grade />} color="#4ECDC4" />
         </Grid>
         <Grid item xs={6} sm={4} md={2.4}>
-          <StatCard title="Acudientes" value={stats.users.parents} icon={<People fontSize="large" />} color="#F59E0B" />
+          <StatCard title="Acudientes" value={stats.users.parents} icon={<People />} color="#F59E0B" />
         </Grid>
       </Grid>
 
       {/* Académico */}
-      <Typography variant="h6" sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
-        <School sx={{ fontSize: 20 }} />
-        Académico
-      </Typography>
-      <Grid container spacing={2} sx={{ mb: 4 }}>
+      <SectionTitle icon={<School />} title="Académico" />
+      <Grid container spacing={{ xs: 1, sm: 1.5, md: 2 }} sx={{ mb: { xs: 3, sm: 4 } }}>
         <Grid item xs={6} md={3}>
-          <StatCard title="Clases" value={stats.academics.classes} icon={<School fontSize="large" />} color="#EF4444" />
+          <StatCard title="Clases" value={stats.academics.classes} icon={<School />} color="#EF4444" />
         </Grid>
         <Grid item xs={6} md={3}>
-          <StatCard title="Materias" value={stats.academics.subjects} icon={<Book fontSize="large" />} color="#10B981" />
+          <StatCard title="Materias" value={stats.academics.subjects} icon={<Book />} color="#10B981" />
         </Grid>
         <Grid item xs={6} md={3}>
-          <StatCard title="Periodos" value={stats.academics.periods} icon={<BarChart fontSize="large" />} color="#6C63FF" />
+          <StatCard title="Periodos" value={stats.academics.periods} icon={<BarChart />} color="#6C63FF" />
         </Grid>
         <Grid item xs={6} md={3}>
-          <StatCard title="Promedio General" value={`${stats.grades.average}`} icon={<TrendingUp fontSize="large" />} color="#F59E0B" subtitle="Sobre 100" />
+          <StatCard 
+            title="Promedio General" 
+            value={`${stats.grades.average}`} 
+            icon={<TrendingUp />} 
+            color="#F59E0B" 
+            subtitle="Sobre 100" 
+          />
         </Grid>
       </Grid>
 
       {/* Calificaciones */}
-      <Typography variant="h6" sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
-        <Grade sx={{ fontSize: 20 }} />
-        Calificaciones
-      </Typography>
-      <Grid container spacing={2} sx={{ mb: 4 }}>
+      <SectionTitle icon={<Grade />} title="Calificaciones" />
+      <Grid container spacing={{ xs: 1, sm: 1.5, md: 2 }} sx={{ mb: { xs: 3, sm: 4 } }}>
         <Grid item xs={6} md={3}>
-          <StatCard title="Total Calificaciones" value={stats.grades.total} icon={<Grade fontSize="large" />} color="#1A1A2E" />
+          <StatCard title="Total Calificaciones" value={stats.grades.total} icon={<Grade />} color="#1A1A2E" />
         </Grid>
         <Grid item xs={6} md={3}>
-          <StatCard title="Aprobados" value={stats.grades.passing} icon={<TrendingUp fontSize="large" />} color="#10B981" />
+          <StatCard title="Aprobados" value={stats.grades.passing} icon={<TrendingUp />} color="#10B981" />
         </Grid>
         <Grid item xs={6} md={3}>
-          <StatCard title="Reprobados" value={stats.grades.failing} icon={<TrendingDown fontSize="large" />} color="#EF4444" />
+          <StatCard title="Reprobados" value={stats.grades.failing} icon={<TrendingDown />} color="#EF4444" />
         </Grid>
         <Grid item xs={6} md={3}>
-          <StatCard title="Tasa de Aprobación" value={`${stats.grades.passingRate}%`} icon={<PieChart fontSize="large" />} color="#6C63FF" />
+          <StatCard title="Tasa de Aprobación" value={`${stats.grades.passingRate}%`} icon={<PieChart />} color="#6C63FF" />
         </Grid>
       </Grid>
 
       {/* Asistencia */}
-      <Typography variant="h6" sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
-        <EventNote sx={{ fontSize: 20 }} />
-        Asistencia
-      </Typography>
-      <Grid container spacing={2}>
+      <SectionTitle icon={<EventNote />} title="Asistencia" />
+      <Grid container spacing={{ xs: 1, sm: 1.5, md: 2 }}>
         <Grid item xs={6} md={3}>
-          <StatCard title="Total Registros" value={stats.attendance.total} icon={<EventNote fontSize="large" />} color="#1A1A2E" />
+          <StatCard title="Total Registros" value={stats.attendance.total} icon={<EventNote />} color="#1A1A2E" />
         </Grid>
         <Grid item xs={6} md={3}>
-          <StatCard title="Presentes" value={stats.attendance.present} icon={<CheckCircle fontSize="large" />} color="#10B981" />
+          <StatCard title="Presentes" value={stats.attendance.present} icon={<CheckCircle />} color="#10B981" />
         </Grid>
         <Grid item xs={6} md={3}>
-          <StatCard title="Ausentes" value={stats.attendance.absent} icon={<Cancel fontSize="large" />} color="#EF4444" />
+          <StatCard title="Ausentes" value={stats.attendance.absent} icon={<Cancel />} color="#EF4444" />
         </Grid>
         <Grid item xs={6} md={3}>
-          <StatCard title="Tasa de Asistencia" value={`${stats.attendance.rate}%`} icon={<PieChart fontSize="large" />} color="#6C63FF" />
+          <StatCard title="Tasa de Asistencia" value={`${stats.attendance.rate}%`} icon={<PieChart />} color="#6C63FF" />
         </Grid>
       </Grid>
 
-      <Divider sx={{ my: 3 }} />
+      <Divider sx={{ my: { xs: 2, sm: 3 } }} />
 
       <Box sx={{ textAlign: 'center', py: 2 }}>
-        <Typography variant="caption" sx={{ color: '#AAA' }}>
+        <Typography variant="caption" sx={{ 
+          color: '#AAA',
+          fontSize: { xs: 10, sm: 11, md: 12 }
+        }}>
           Última actualización: {new Date().toLocaleString()}
         </Typography>
       </Box>
     </Box>
   )
 }
-
-// Importar iconos faltantes
-import Book from '@mui/icons-material/Book'
-import TrendingDown from '@mui/icons-material/TrendingDown'
-import EventNote from '@mui/icons-material/EventNote'
-import CheckCircle from '@mui/icons-material/CheckCircle'
-import Cancel from '@mui/icons-material/Cancel'
 
 export default AdminStatistics

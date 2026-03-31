@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { 
   Box, Typography, CircularProgress, FormControl, 
-  InputLabel, Select, MenuItem, Grid, Card, CardContent 
+  InputLabel, Select, MenuItem, Grid, Card, CardContent,
+  useMediaQuery, useTheme
 } from '@mui/material'
 import {
   PeopleOutlined,
@@ -25,151 +26,215 @@ const getAvatarColor = (name = '') => {
   return { bg: `hsl(${hue},42%,90%)`, fg: `hsl(${hue},42%,28%)` }
 }
 
-// ── Sub-componentes ───────────────────────────────────────────────────────────
+// ── Sub-componentes optimizados ───────────────────────────────────────────
 
-const KpiCard = ({ label, value, icon, accent = '#1A1A2E', note }) => (
-  <Box
-    sx={{
-      p: '18px 20px',
-      borderRadius: '14px',
-      border: '0.5px solid',
-      borderColor: 'divider',
-      background: '#fff',
-      display: 'flex',
-      gap: 2,
-      alignItems: 'flex-start',
-      transition: 'box-shadow .15s',
-      '&:hover': { boxShadow: '0 4px 18px rgba(0,0,0,0.06)' },
-    }}
-  >
+const KpiCard = ({ label, value, icon, accent = '#1A1A2E', note }) => {
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
+  
+  return (
     <Box
       sx={{
-        width: 38,
-        height: 38,
-        borderRadius: '10px',
-        background: `${accent}12`,
+        p: { xs: '12px 14px', sm: '14px 16px', md: '18px 20px' },
+        borderRadius: { xs: '12px', sm: '13px', md: '14px' },
+        border: '0.5px solid',
+        borderColor: 'divider',
+        background: '#fff',
         display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        color: accent,
-        flexShrink: 0,
-        mt: '2px',
+        gap: { xs: 1.5, sm: 2 },
+        alignItems: 'flex-start',
+        transition: 'box-shadow .15s',
+        '&:hover': { boxShadow: '0 4px 18px rgba(0,0,0,0.06)' },
+        height: '100%',
       }}
     >
-      {React.cloneElement(icon, { sx: { fontSize: 18 } })}
-    </Box>
-    <Box>
-      <Typography sx={{ fontSize: 12, color: '#888', mb: 0.25 }}>{label}</Typography>
-      <Typography
+      <Box
         sx={{
-          fontFamily: '"Instrument Serif", serif',
-          fontSize: 32,
+          width: { xs: 32, sm: 35, md: 38 },
+          height: { xs: 32, sm: 35, md: 38 },
+          borderRadius: { xs: '8px', sm: '9px', md: '10px' },
+          background: `${accent}12`,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
           color: accent,
-          lineHeight: 1,
-          letterSpacing: '-0.02em',
+          flexShrink: 0,
+          mt: '2px',
         }}
       >
-        {value}
-      </Typography>
-      {note && <Typography sx={{ fontSize: 11, color: '#AAA', mt: 0.5 }}>{note}</Typography>}
+        {React.cloneElement(icon, { sx: { fontSize: { xs: 16, sm: 17, md: 18 } } })}
+      </Box>
+      <Box sx={{ flex: 1, minWidth: 0 }}>
+        <Typography sx={{ 
+          fontSize: { xs: 10, sm: 11, md: 12 }, 
+          color: '#888', 
+          mb: 0.25 
+        }}>
+          {label}
+        </Typography>
+        <Typography
+          sx={{
+            fontFamily: '"Instrument Serif", serif',
+            fontSize: { xs: 24, sm: 28, md: 32 },
+            color: accent,
+            lineHeight: 1,
+            letterSpacing: '-0.02em',
+            wordBreak: 'break-word',
+          }}
+        >
+          {value}
+        </Typography>
+        {note && (
+          <Typography sx={{ 
+            fontSize: { xs: 9, sm: 10, md: 11 }, 
+            color: '#AAA', 
+            mt: 0.5,
+            lineHeight: 1.2
+          }}>
+            {note}
+          </Typography>
+        )}
+      </Box>
     </Box>
-  </Box>
-)
+  )
+}
 
 const StudentRow = ({ student, index }) => {
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
   const { bg, fg } = getAvatarColor(student.student_name || student.full_name || '')
+  
   return (
     <Box
       sx={{
         display: 'flex',
         alignItems: 'center',
-        gap: 1.5,
-        py: 1.25,
+        gap: { xs: 1, sm: 1.5 },
+        py: { xs: 1, sm: 1.25 },
         borderBottom: '0.5px solid #F5F3EE',
         '&:last-child': { borderBottom: 'none' },
       }}
     >
-      <Typography sx={{ fontSize: 11, color: '#CCC', minWidth: 18 }}>{index + 1}</Typography>
+      <Typography sx={{ 
+        fontSize: { xs: 10, sm: 11 }, 
+        color: '#CCC', 
+        minWidth: { xs: 14, sm: 18 } 
+      }}>
+        {index + 1}
+      </Typography>
       <Box
         sx={{
-          width: 28,
-          height: 28,
+          width: { xs: 24, sm: 26, md: 28 },
+          height: { xs: 24, sm: 26, md: 28 },
           borderRadius: '50%',
           background: bg,
           color: fg,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          fontSize: 10,
+          fontSize: { xs: 9, sm: 9.5, md: 10 },
           fontWeight: 600,
           flexShrink: 0,
         }}
       >
         {getInitials(student.student_name || student.full_name || 'E')}
       </Box>
-      <Typography sx={{ fontSize: 13, color: '#1A1A2E', flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+      <Typography sx={{ 
+        fontSize: { xs: 12, sm: 12.5, md: 13 }, 
+        color: '#1A1A2E', 
+        flex: 1, 
+        minWidth: 0, 
+        overflow: 'hidden', 
+        textOverflow: 'ellipsis', 
+        whiteSpace: 'nowrap' 
+      }}>
         {student.student_name || student.full_name}
       </Typography>
+      {!isMobile && (
+        <Box sx={{ minWidth: 24 }} />
+      )}
     </Box>
   )
 }
 
-const ActivityRow = ({ activity }) => (
-  <Box
-    sx={{
-      display: 'flex',
-      alignItems: 'center',
-      gap: 2,
-      py: 1.25,
-      borderBottom: '0.5px solid #F5F3EE',
-      '&:last-child': { borderBottom: 'none' },
-    }}
-  >
+const ActivityRow = ({ activity }) => {
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
+  
+  return (
     <Box
       sx={{
-        width: 32,
-        height: 32,
-        borderRadius: '8px',
-        background: '#FEF3C712',
         display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        color: '#F59E0B',
-        flexShrink: 0,
+        flexDirection: { xs: 'column', sm: 'row' },
+        alignItems: { xs: 'flex-start', sm: 'center' },
+        gap: { xs: 1, sm: 2 },
+        py: { xs: 1.2, sm: 1.25 },
+        borderBottom: '0.5px solid #F5F3EE',
+        '&:last-child': { borderBottom: 'none' },
       }}
     >
-      <AssignmentOutlined sx={{ fontSize: 15 }} />
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, width: '100%' }}>
+        <Box
+          sx={{
+            width: { xs: 28, sm: 30, md: 32 },
+            height: { xs: 28, sm: 30, md: 32 },
+            borderRadius: { xs: '7px', sm: '7.5px', md: '8px' },
+            background: '#FEF3C712',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: '#F59E0B',
+            flexShrink: 0,
+          }}
+        >
+          <AssignmentOutlined sx={{ fontSize: { xs: 13, sm: 14, md: 15 } }} />
+        </Box>
+        <Box sx={{ flex: 1, minWidth: 0 }}>
+          <Typography sx={{ 
+            fontSize: { xs: 12, sm: 12.5, md: 13 }, 
+            color: '#1A1A2E', 
+            overflow: 'hidden', 
+            textOverflow: 'ellipsis', 
+            whiteSpace: 'nowrap' 
+          }}>
+            {activity.name}
+          </Typography>
+          <Typography sx={{ 
+            fontSize: { xs: 10, sm: 10.5, md: 11 }, 
+            color: '#AAA' 
+          }}>
+            {activity.subject_name} · {activity.percentage}% del periodo
+          </Typography>
+        </Box>
+        <Box
+          sx={{
+            px: { xs: 0.75, sm: 1, md: 1.25 },
+            py: { xs: 0.3, sm: 0.35, md: 0.4 },
+            borderRadius: '20px',
+            background: '#FEF3C7',
+            color: '#92400E',
+            fontSize: { xs: 9, sm: 10, md: 11 },
+            fontWeight: 500,
+            flexShrink: 0,
+            whiteSpace: 'nowrap',
+          }}
+        >
+          Pendiente
+        </Box>
+      </Box>
     </Box>
-    <Box sx={{ flex: 1, minWidth: 0 }}>
-      <Typography sx={{ fontSize: 13, color: '#1A1A2E', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-        {activity.name}
-      </Typography>
-      <Typography sx={{ fontSize: 11, color: '#AAA' }}>
-        {activity.subject_name} · {activity.percentage}% del periodo
-      </Typography>
-    </Box>
-    <Box
-      sx={{
-        px: 1.25,
-        py: 0.4,
-        borderRadius: '20px',
-        background: '#FEF3C7',
-        color: '#92400E',
-        fontSize: 11,
-        fontWeight: 500,
-        flexShrink: 0,
-      }}
-    >
-      Pendiente
-    </Box>
-  </Box>
-)
+  )
+}
 
-// ── Dashboard ─────────────────────────────────────────────────────────────────
+// ── Dashboard Principal Optimizado ─────────────────────────────────────────────────
 
 const TeacherDashboard = () => {
   const { user } = useAuth()
   const navigate = useNavigate()
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
+  const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'))
+  
   const [loading, setLoading] = useState(true)
   const [allStudents, setAllStudents] = useState([])
   const [filteredStudents, setFilteredStudents] = useState([])
@@ -188,7 +253,6 @@ const TeacherDashboard = () => {
 
   const filterStudentsByClass = () => {
     if (selectedClass && allStudents.length > 0) {
-      // Filtrar estudiantes por la clase seleccionada
       const filtered = allStudents.filter(s => s.grade_id === selectedClass || s.grade === selectedClass)
       setFilteredStudents(filtered)
     } else {
@@ -199,7 +263,6 @@ const TeacherDashboard = () => {
   const fetchData = async () => {
     setLoading(true)
     try {
-      // Obtener asignaciones del profesor (materias que dicta)
       let assignmentsData = []
       try {
         const r = await api.get('/academics/my-assignments/')
@@ -207,13 +270,11 @@ const TeacherDashboard = () => {
         setAssignments(assignmentsData)
         setStats(prev => ({ ...prev, totalSubjects: assignmentsData.length }))
         
-        // Seleccionar primera clase por defecto
         if (assignmentsData.length > 0 && !selectedClass) {
           setSelectedClass(assignmentsData[0].grade_id)
         }
       } catch(e) { console.error('Error fetching assignments:', e) }
       
-      // Obtener estudiantes del profesor
       try {
         const r = await api.get('/academics/my-students/')
         const studentsData = Array.isArray(r.data) ? r.data : (r.data?.results || [])
@@ -221,7 +282,6 @@ const TeacherDashboard = () => {
         setStats(prev => ({ ...prev, totalStudents: studentsData.length }))
       } catch(e) { console.error('Error fetching students:', e) }
       
-      // Obtener actividades pendientes
       try {
         const r = await api.get('/grades/my-activities/')
         const activitiesData = Array.isArray(r.data) ? r.data : (r.data?.results || [])
@@ -251,58 +311,113 @@ const TeacherDashboard = () => {
   return (
     <>
       <style>{FONT}</style>
-      <Box sx={{ fontFamily: '"DM Sans", sans-serif', maxWidth: 1100, pb: 4 }}>
+      <Box sx={{ 
+        fontFamily: '"DM Sans", sans-serif', 
+        maxWidth: { xs: '100%', sm: '95%', md: 1100 },
+        width: '100%',
+        mx: 'auto',
+        px: { xs: 1.5, sm: 2, md: 3 },
+        pb: { xs: 3, sm: 4, md: 4 }
+      }}>
 
-        {/* ── Encabezado ── */}
-        <Box sx={{ mb: 4 }}>
-          <Typography sx={{ fontSize: 12, color: '#AAA', mb: 0.5, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+        {/* ── Encabezado optimizado ── */}
+        <Box sx={{ mb: { xs: 3, sm: 3.5, md: 4 } }}>
+          <Typography sx={{ 
+            fontSize: { xs: 10, sm: 11, md: 12 }, 
+            color: '#AAA', 
+            mb: 0.5, 
+            letterSpacing: '0.06em', 
+            textTransform: 'uppercase' 
+          }}>
             Panel del profesor
           </Typography>
           <Typography
             sx={{
               fontFamily: '"Instrument Serif", serif',
-              fontSize: { xs: 28, sm: 36 },
+              fontSize: { xs: 24, sm: 30, md: 36 },
               color: '#1A1A2E',
               letterSpacing: '-0.02em',
               lineHeight: 1.05,
+              wordBreak: 'break-word',
             }}
           >
             Bienvenido, {user?.first_name || user?.username}
           </Typography>
-          <Typography sx={{ fontSize: 13, color: '#AAA', mt: 0.5 }}>
+          <Typography sx={{ 
+            fontSize: { xs: 11, sm: 12, md: 13 }, 
+            color: '#AAA', 
+            mt: 0.5 
+          }}>
             {new Date().toLocaleDateString('es-CO', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
           </Typography>
         </Box>
 
-        {/* ── KPIs ── */}
-        <Grid container spacing={1.5} sx={{ mb: 3 }}>
+        {/* ── KPIs optimizados ── */}
+        <Grid container spacing={1.5} sx={{ mb: { xs: 2.5, sm: 3 } }}>
           <Grid item xs={6} sm={3}>
-            <KpiCard label="Estudiantes" value={filteredStudents.length} icon={<PeopleOutlined />} accent="#6C63FF" note="En esta clase" />
+            <KpiCard 
+              label="Estudiantes" 
+              value={filteredStudents.length} 
+              icon={<PeopleOutlined />} 
+              accent="#6C63FF" 
+              note={isMobile ? "Esta clase" : "En esta clase"} 
+            />
           </Grid>
           <Grid item xs={6} sm={3}>
-            <KpiCard label="Materias" value={assignments.length} icon={<MenuBookOutlined />} accent="#4ECDC4" note="Este periodo" />
+            <KpiCard 
+              label="Materias" 
+              value={assignments.length} 
+              icon={<MenuBookOutlined />} 
+              accent="#4ECDC4" 
+              note={isMobile ? "Periodo" : "Este periodo"} 
+            />
           </Grid>
           <Grid item xs={6} sm={3}>
-            <KpiCard label="Actividades" value={activities.length} icon={<AssignmentOutlined />} accent="#F59E0B" note="Creadas" />
+            <KpiCard 
+              label="Actividades" 
+              value={activities.length} 
+              icon={<AssignmentOutlined />} 
+              accent="#F59E0B" 
+              note={isMobile ? "Creadas" : "Creadas"} 
+            />
           </Grid>
           <Grid item xs={6} sm={3}>
-            <KpiCard label="Sin calificar" value={stats.pendingGrades} icon={<GradeOutlined />} accent={stats.pendingGrades > 0 ? '#EF4444' : '#10B981'} note={stats.pendingGrades > 0 ? 'Requieren atención' : 'Al día'} />
+            <KpiCard 
+              label="Sin calificar" 
+              value={stats.pendingGrades} 
+              icon={<GradeOutlined />} 
+              accent={stats.pendingGrades > 0 ? '#EF4444' : '#10B981'} 
+              note={stats.pendingGrades > 0 ? (isMobile ? "Requieren" : "Requieren atención") : 'Al día'} 
+            />
           </Grid>
         </Grid>
 
-        {/* ── Selector de Clase ── */}
+        {/* ── Selector de Clase optimizado ── */}
         {assignments.length > 0 && (
           <Box sx={{ mb: 3 }}>
-            <FormControl fullWidth size="small" sx={{ maxWidth: 300 }}>
-              <InputLabel>Clase / Materia</InputLabel>
+            <FormControl 
+              fullWidth={isMobile} 
+              size="small" 
+              sx={{ 
+                maxWidth: { xs: '100%', sm: 350, md: 400 },
+                width: { xs: '100%', sm: 'auto' }
+              }}
+            >
+              <InputLabel sx={{ fontSize: { xs: 12, sm: 13 } }}>
+                Clase / Materia
+              </InputLabel>
               <Select
                 value={selectedClass}
                 onChange={(e) => setSelectedClass(e.target.value)}
                 label="Clase / Materia"
+                sx={{ fontSize: { xs: 12, sm: 13 } }}
               >
                 {assignments.map((cls) => (
-                  <MenuItem key={cls.id} value={cls.grade_id}>
-                    {cls.subject_name} — {cls.grade_name}
+                  <MenuItem key={cls.id} value={cls.grade_id} sx={{ fontSize: { xs: 12, sm: 13 } }}>
+                    {isMobile 
+                      ? `${cls.subject_name} - ${cls.grade_name}`
+                      : `${cls.subject_name} — ${cls.grade_name}`
+                    }
                   </MenuItem>
                 ))}
               </Select>
@@ -310,30 +425,35 @@ const TeacherDashboard = () => {
           </Box>
         )}
 
-        {/* ── Acceso rápido a módulos ── */}
-        <Grid container spacing={1.25} sx={{ mb: 3 }}>
+        {/* ── Acceso rápido a módulos optimizado ── */}
+        <Grid container spacing={1.25} sx={{ mb: { xs: 2.5, sm: 3 } }}>
           <Grid item xs={12} sm={6}>
             <Box
               onClick={() => navigate('/teacher/attendance')}
               sx={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: 2,
-                p: '14px 18px',
-                borderRadius: '12px',
+                gap: { xs: 1.5, sm: 2 },
+                p: { xs: '10px 14px', sm: '12px 16px', md: '14px 18px' },
+                borderRadius: { xs: '10px', sm: '11px', md: '12px' },
                 border: '0.5px solid',
                 borderColor: 'divider',
                 background: '#fff',
                 cursor: 'pointer',
                 transition: 'all .15s',
-                '&:hover': { borderColor: '#6C63FF', background: '#6C63FF06', transform: 'translateY(-2px)', boxShadow: '0 4px 16px #6C63FF20' },
+                '&:hover': { 
+                  borderColor: '#6C63FF', 
+                  background: '#6C63FF06', 
+                  transform: { xs: 'none', sm: 'translateY(-2px)' },
+                  boxShadow: { sm: '0 4px 16px #6C63FF20' }
+                },
               }}
             >
               <Box
                 sx={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: '10px',
+                  width: { xs: 32, sm: 36, md: 40 },
+                  height: { xs: 32, sm: 36, md: 40 },
+                  borderRadius: { xs: '8px', sm: '9px', md: '10px' },
                   background: '#6C63FF12',
                   display: 'flex',
                   alignItems: 'center',
@@ -342,13 +462,23 @@ const TeacherDashboard = () => {
                   flexShrink: 0,
                 }}
               >
-                <ChecklistOutlined sx={{ fontSize: 20 }} />
+                <ChecklistOutlined sx={{ fontSize: { xs: 16, sm: 18, md: 20 } }} />
               </Box>
-              <Box sx={{ flex: 1 }}>
-                <Typography sx={{ fontSize: 14, fontWeight: 500, color: '#1A1A2E' }}>Tomar asistencia hoy</Typography>
-                <Typography sx={{ fontSize: 12, color: '#AAA' }}>Registra la asistencia de tus clases</Typography>
+              <Box sx={{ flex: 1, minWidth: 0 }}>
+                <Typography sx={{ 
+                  fontSize: { xs: 12, sm: 13, md: 14 }, 
+                  fontWeight: 500, 
+                  color: '#1A1A2E' 
+                }}>
+                  Tomar asistencia hoy
+                </Typography>
+                {!isMobile && (
+                  <Typography sx={{ fontSize: { xs: 11, sm: 11.5, md: 12 }, color: '#AAA' }}>
+                    Registra la asistencia de tus clases
+                  </Typography>
+                )}
               </Box>
-              <ArrowForwardOutlined sx={{ fontSize: 16, color: '#CCC' }} />
+              <ArrowForwardOutlined sx={{ fontSize: { xs: 14, sm: 15, md: 16 }, color: '#CCC', flexShrink: 0 }} />
             </Box>
           </Grid>
           <Grid item xs={12} sm={6}>
@@ -357,22 +487,27 @@ const TeacherDashboard = () => {
               sx={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: 2,
-                p: '14px 18px',
-                borderRadius: '12px',
+                gap: { xs: 1.5, sm: 2 },
+                p: { xs: '10px 14px', sm: '12px 16px', md: '14px 18px' },
+                borderRadius: { xs: '10px', sm: '11px', md: '12px' },
                 border: '0.5px solid',
                 borderColor: 'divider',
                 background: '#fff',
                 cursor: 'pointer',
                 transition: 'all .15s',
-                '&:hover': { borderColor: '#4ECDC4', background: '#4ECDC406', transform: 'translateY(-2px)', boxShadow: '0 4px 16px #4ECDC420' },
+                '&:hover': { 
+                  borderColor: '#4ECDC4', 
+                  background: '#4ECDC406', 
+                  transform: { xs: 'none', sm: 'translateY(-2px)' },
+                  boxShadow: { sm: '0 4px 16px #4ECDC420' }
+                },
               }}
             >
               <Box
                 sx={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: '10px',
+                  width: { xs: 32, sm: 36, md: 40 },
+                  height: { xs: 32, sm: 36, md: 40 },
+                  borderRadius: { xs: '8px', sm: '9px', md: '10px' },
                   background: '#4ECDC412',
                   display: 'flex',
                   alignItems: 'center',
@@ -381,24 +516,34 @@ const TeacherDashboard = () => {
                   flexShrink: 0,
                 }}
               >
-                <GradeOutlined sx={{ fontSize: 20 }} />
+                <GradeOutlined sx={{ fontSize: { xs: 16, sm: 18, md: 20 } }} />
               </Box>
-              <Box sx={{ flex: 1 }}>
-                <Typography sx={{ fontSize: 14, fontWeight: 500, color: '#1A1A2E' }}>Gestionar calificaciones</Typography>
-                <Typography sx={{ fontSize: 12, color: '#AAA' }}>Ingresa y revisa notas por actividad</Typography>
+              <Box sx={{ flex: 1, minWidth: 0 }}>
+                <Typography sx={{ 
+                  fontSize: { xs: 12, sm: 13, md: 14 }, 
+                  fontWeight: 500, 
+                  color: '#1A1A2E' 
+                }}>
+                  Gestionar calificaciones
+                </Typography>
+                {!isMobile && (
+                  <Typography sx={{ fontSize: { xs: 11, sm: 11.5, md: 12 }, color: '#AAA' }}>
+                    Ingresa y revisa notas por actividad
+                  </Typography>
+                )}
               </Box>
-              <ArrowForwardOutlined sx={{ fontSize: 16, color: '#CCC' }} />
+              <ArrowForwardOutlined sx={{ fontSize: { xs: 14, sm: 15, md: 16 }, color: '#CCC', flexShrink: 0 }} />
             </Box>
           </Grid>
         </Grid>
 
-        {/* ── Dos columnas ── */}
-        <Grid container spacing={2}>
+        {/* ── Dos columnas optimizadas ── */}
+        <Grid container spacing={{ xs: 1.5, sm: 2 }}>
           {/* Mis estudiantes */}
           <Grid item xs={12} md={6}>
             <Box
               sx={{
-                p: 2.5,
+                p: { xs: 1.5, sm: 2, md: 2.5 },
                 borderRadius: '14px',
                 border: '0.5px solid',
                 borderColor: 'divider',
@@ -406,30 +551,59 @@ const TeacherDashboard = () => {
                 height: '100%',
               }}
             >
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                <Typography sx={{ fontSize: 13, fontWeight: 500, color: '#1A1A2E' }}>
+              <Box sx={{ 
+                display: 'flex', 
+                flexDirection: { xs: 'column', sm: 'row' },
+                justifyContent: 'space-between', 
+                alignItems: { xs: 'flex-start', sm: 'center' },
+                gap: { xs: 1, sm: 0 },
+                mb: 2 
+              }}>
+                <Typography sx={{ 
+                  fontSize: { xs: 12, sm: 12.5, md: 13 }, 
+                  fontWeight: 500, 
+                  color: '#1A1A2E' 
+                }}>
                   Mis estudiantes {currentClass && `- ${currentClass.grade_name}`}
                 </Typography>
                 <Box
                   onClick={() => navigate('/teacher/grades')}
-                  sx={{ fontSize: 12, color: '#6C63FF', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 0.5, '&:hover': { textDecoration: 'underline' } }}
+                  sx={{ 
+                    fontSize: { xs: 11, sm: 11.5, md: 12 }, 
+                    color: '#6C63FF', 
+                    cursor: 'pointer', 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: 0.5,
+                    '&:hover': { textDecoration: 'underline' }
+                  }}
                 >
-                  Ver todos <ArrowForwardOutlined sx={{ fontSize: 12 }} />
+                  Ver todos <ArrowForwardOutlined sx={{ fontSize: { xs: 11, sm: 12 } }} />
                 </Box>
               </Box>
               {filteredStudents.length === 0 ? (
-                <Box py={3} textAlign="center">
-                  <Typography sx={{ fontSize: 13, color: '#AAA' }}>No hay estudiantes en esta clase</Typography>
+                <Box py={{ xs: 2, sm: 3 }} textAlign="center">
+                  <Typography sx={{ fontSize: { xs: 12, sm: 13 }, color: '#AAA' }}>
+                    No hay estudiantes en esta clase
+                  </Typography>
                 </Box>
               ) : (
-                filteredStudents.slice(0, 6).map((s, i) => <StudentRow key={s.id || i} student={s} index={i} />)
+                filteredStudents.slice(0, isMobile ? 4 : 6).map((s, i) => (
+                  <StudentRow key={s.id || i} student={s} index={i} />
+                ))
               )}
-              {filteredStudents.length > 6 && (
+              {filteredStudents.length > (isMobile ? 4 : 6) && (
                 <Typography
                   onClick={() => navigate('/teacher/grades')}
-                  sx={{ fontSize: 12, color: '#6C63FF', mt: 1.5, cursor: 'pointer', textAlign: 'center' }}
+                  sx={{ 
+                    fontSize: { xs: 11, sm: 12 }, 
+                    color: '#6C63FF', 
+                    mt: 1.5, 
+                    cursor: 'pointer', 
+                    textAlign: 'center' 
+                  }}
                 >
-                  + {filteredStudents.length - 6} más
+                  + {filteredStudents.length - (isMobile ? 4 : 6)} más
                 </Typography>
               )}
             </Box>
@@ -439,7 +613,7 @@ const TeacherDashboard = () => {
           <Grid item xs={12} md={6}>
             <Box
               sx={{
-                p: 2.5,
+                p: { xs: 1.5, sm: 2, md: 2.5 },
                 borderRadius: '14px',
                 border: '0.5px solid',
                 borderColor: 'divider',
@@ -447,23 +621,46 @@ const TeacherDashboard = () => {
                 height: '100%',
               }}
             >
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                <Typography sx={{ fontSize: 13, fontWeight: 500, color: '#1A1A2E' }}>
+              <Box sx={{ 
+                display: 'flex', 
+                flexDirection: { xs: 'column', sm: 'row' },
+                justifyContent: 'space-between', 
+                alignItems: { xs: 'flex-start', sm: 'center' },
+                gap: { xs: 1, sm: 0 },
+                mb: 2 
+              }}>
+                <Typography sx={{ 
+                  fontSize: { xs: 12, sm: 12.5, md: 13 }, 
+                  fontWeight: 500, 
+                  color: '#1A1A2E' 
+                }}>
                   Actividades pendientes
                 </Typography>
                 <Box
                   onClick={() => navigate('/teacher/grades')}
-                  sx={{ fontSize: 12, color: '#F59E0B', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 0.5, '&:hover': { textDecoration: 'underline' } }}
+                  sx={{ 
+                    fontSize: { xs: 11, sm: 11.5, md: 12 }, 
+                    color: '#F59E0B', 
+                    cursor: 'pointer', 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: 0.5,
+                    '&:hover': { textDecoration: 'underline' }
+                  }}
                 >
-                  Calificar <ArrowForwardOutlined sx={{ fontSize: 12 }} />
+                  Calificar <ArrowForwardOutlined sx={{ fontSize: { xs: 11, sm: 12 } }} />
                 </Box>
               </Box>
               {activities.length === 0 ? (
-                <Box py={3} textAlign="center">
-                  <Typography sx={{ fontSize: 13, color: '#AAA' }}>¡Todo al día! No hay pendientes.</Typography>
+                <Box py={{ xs: 2, sm: 3 }} textAlign="center">
+                  <Typography sx={{ fontSize: { xs: 12, sm: 13 }, color: '#AAA' }}>
+                    ¡Todo al día! No hay pendientes.
+                  </Typography>
                 </Box>
               ) : (
-                activities.slice(0, 5).map((a, i) => <ActivityRow key={a.id || i} activity={a} />)
+                activities.slice(0, isMobile ? 4 : 5).map((a, i) => (
+                  <ActivityRow key={a.id || i} activity={a} />
+                ))
               )}
             </Box>
           </Grid>

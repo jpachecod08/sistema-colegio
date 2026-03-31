@@ -23,13 +23,19 @@ import {
   Switch,
   FormControlLabel,
   CircularProgress,
-  MenuItem
+  MenuItem,
+  useMediaQuery,
+  useTheme
 } from '@mui/material'
 import { Add, Edit, Delete, ArrowBack, School } from '@mui/icons-material'
 import api from '../../services/api'
 
 const AdminClasses = () => {
   const navigate = useNavigate()
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
+  const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'))
+  
   const [classes, setClasses] = useState([])
   const [schoolYears, setSchoolYears] = useState([])
   const [loading, setLoading] = useState(true)
@@ -79,7 +85,6 @@ const AdminClasses = () => {
       const response = await api.get('/academics/school-years/')
       const data = extractDataFromResponse(response)
       setSchoolYears(data)
-      // Si hay años escolares y es nuevo formulario, seleccionar el primero
       if (data.length > 0 && !editingClass) {
         setFormData(prev => ({ ...prev, school_year: data[0].id }))
       }
@@ -155,7 +160,6 @@ const AdminClasses = () => {
       fetchClasses()
     } catch (error) {
       console.error('Error saving class:', error)
-      console.error('Response data:', error.response?.data)
       const errorMsg = error.response?.data?.name?.[0] || 
                        error.response?.data?.order?.[0] ||
                        error.response?.data?.school_year?.[0] ||
@@ -200,19 +204,46 @@ const AdminClasses = () => {
   }
 
   return (
-    <Box sx={{ p: 3 }}>
-      {/* Header */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+    <Box sx={{ 
+      p: { xs: 1.5, sm: 2, md: 3 },
+      maxWidth: '100%',
+      overflowX: 'hidden'
+    }}>
+      {/* Header Responsive */}
+      <Box sx={{ 
+        display: 'flex', 
+        flexDirection: { xs: 'column', sm: 'row' },
+        justifyContent: 'space-between', 
+        alignItems: { xs: 'flex-start', sm: 'center' }, 
+        gap: { xs: 2, sm: 0 },
+        mb: { xs: 2, sm: 3 }
+      }}>
+        <Box sx={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: { xs: 1, sm: 2 },
+          flexWrap: 'wrap'
+        }}>
           <Button 
             variant="outlined" 
             onClick={() => navigate('/admin')}
             startIcon={<ArrowBack />}
-            sx={{ borderRadius: '8px' }}
+            sx={{ 
+              borderRadius: '8px',
+              px: { xs: 1.5, sm: 2 },
+              py: { xs: 0.5, sm: 0.75 },
+              fontSize: { xs: 12, sm: 13 }
+            }}
           >
             Volver
           </Button>
-          <Typography variant="h4" sx={{ fontFamily: '"Instrument Serif", serif' }}>
+          <Typography 
+            variant="h4" 
+            sx={{ 
+              fontFamily: '"Instrument Serif", serif',
+              fontSize: { xs: 20, sm: 28, md: 32 }
+            }}
+          >
             Gestión de Clases (Grados)
           </Typography>
         </Box>
@@ -224,38 +255,51 @@ const AdminClasses = () => {
             background: 'linear-gradient(135deg, #1A1A2E 0%, #2D2B55 100%)',
             '&:hover': { opacity: 0.9 },
             borderRadius: '10px',
-            textTransform: 'none'
+            textTransform: 'none',
+            px: { xs: 2, sm: 3 },
+            py: { xs: 0.75, sm: 1 },
+            fontSize: { xs: 12, sm: 13 },
+            width: { xs: '100%', sm: 'auto' }
           }}
         >
           Nueva Clase
         </Button>
       </Box>
 
-      {/* Tabla de clases */}
-      <TableContainer component={Paper} sx={{ borderRadius: '14px', border: '0.5px solid #E0DDD8' }}>
-        <Table>
+      {/* Tabla de clases - Responsive con scroll horizontal */}
+      <TableContainer 
+        component={Paper} 
+        sx={{ 
+          borderRadius: '14px', 
+          border: '0.5px solid #E0DDD8',
+          overflowX: 'auto'
+        }}
+      >
+        <Table sx={{ minWidth: isMobile ? 500 : 'auto' }}>
           <TableHead>
             <TableRow sx={{ background: '#F5F3EE' }}>
-              <TableCell sx={{ fontWeight: 600 }}>Nombre</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>Orden</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>Año Escolar</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>Estado</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>Acciones</TableCell>
+              <TableCell sx={{ fontWeight: 600, fontSize: { xs: 12, sm: 13 } }}>Nombre</TableCell>
+              <TableCell sx={{ fontWeight: 600, fontSize: { xs: 12, sm: 13 } }}>Orden</TableCell>
+              {!isMobile && (
+                <TableCell sx={{ fontWeight: 600, fontSize: { xs: 12, sm: 13 } }}>Año Escolar</TableCell>
+              )}
+              <TableCell sx={{ fontWeight: 600, fontSize: { xs: 12, sm: 13 } }}>Estado</TableCell>
+              <TableCell sx={{ fontWeight: 600, fontSize: { xs: 12, sm: 13 } }}>Acciones</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {classes.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={5} align="center">
-                  <Box sx={{ py: 4, textAlign: 'center' }}>
-                    <School sx={{ fontSize: 48, color: '#CCC', mb: 1 }} />
-                    <Typography sx={{ color: '#AAA' }}>
+                  <Box sx={{ py: { xs: 3, sm: 4 }, textAlign: 'center' }}>
+                    <School sx={{ fontSize: { xs: 36, sm: 48 }, color: '#CCC', mb: 1 }} />
+                    <Typography sx={{ color: '#AAA', fontSize: { xs: 12, sm: 13 } }}>
                       No hay clases registradas
                     </Typography>
                     <Button
                       variant="outlined"
                       onClick={() => handleOpenDialog()}
-                      sx={{ mt: 2 }}
+                      sx={{ mt: 2, fontSize: { xs: 11, sm: 12 } }}
                     >
                       Crear primera clase
                     </Button>
@@ -266,17 +310,30 @@ const AdminClasses = () => {
               classes.map((classItem) => (
                 <TableRow key={classItem.id} hover>
                   <TableCell>
-                    <Typography sx={{ fontWeight: 500 }}>{classItem.name}</Typography>
+                    <Typography sx={{ 
+                      fontWeight: 500, 
+                      fontSize: { xs: 12, sm: 13 },
+                      wordBreak: 'break-word'
+                    }}>
+                      {classItem.name}
+                    </Typography>
                   </TableCell>
-                  <TableCell>{classItem.order}</TableCell>
-                  <TableCell>{classItem.school_year_name || classItem.school_year}</TableCell>
+                  <TableCell sx={{ fontSize: { xs: 12, sm: 13 } }}>
+                    {classItem.order}
+                  </TableCell>
+                  {!isMobile && (
+                    <TableCell sx={{ fontSize: { xs: 12, sm: 13 } }}>
+                      {classItem.school_year_name || classItem.school_year}
+                    </TableCell>
+                  )}
                   <TableCell>
                     <Chip
                       label={classItem.is_active !== false ? 'Activo' : 'Inactivo'}
                       sx={{
                         backgroundColor: classItem.is_active !== false ? '#10B98120' : '#EF444420',
                         color: classItem.is_active !== false ? '#10B981' : '#EF4444',
-                        fontSize: 12
+                        fontSize: { xs: 10, sm: 12 },
+                        height: { xs: 24, sm: 32 }
                       }}
                     />
                   </TableCell>
@@ -284,21 +341,24 @@ const AdminClasses = () => {
                     <IconButton 
                       size="small" 
                       onClick={() => handleOpenDialog(classItem)}
-                      sx={{ color: '#6C63FF' }}
+                      sx={{ color: '#6C63FF', p: { xs: 0.5, sm: 0.75 } }}
                     >
                       <Edit fontSize="small" />
                     </IconButton>
                     <IconButton 
                       size="small" 
                       onClick={() => handleToggleActive(classItem)}
-                      sx={{ color: classItem.is_active !== false ? '#F59E0B' : '#10B981' }}
+                      sx={{ 
+                        color: classItem.is_active !== false ? '#F59E0B' : '#10B981',
+                        p: { xs: 0.5, sm: 0.75 }
+                      }}
                     >
                       {classItem.is_active !== false ? '🔴' : '🟢'}
                     </IconButton>
                     <IconButton 
                       size="small" 
                       onClick={() => handleDeleteClass(classItem.id)}
-                      sx={{ color: '#EF4444' }}
+                      sx={{ color: '#EF4444', p: { xs: 0.5, sm: 0.75 } }}
                     >
                       <Delete fontSize="small" />
                     </IconButton>
@@ -310,15 +370,32 @@ const AdminClasses = () => {
         </Table>
       </TableContainer>
 
-      {/* Dialog para crear/editar clase */}
-      <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
-        <DialogTitle sx={{ fontFamily: '"Instrument Serif", serif', fontSize: 24 }}>
+      {/* Dialog Responsive */}
+      <Dialog 
+        open={openDialog} 
+        onClose={handleCloseDialog} 
+        maxWidth="sm" 
+        fullWidth
+        fullScreen={isMobile}
+        PaperProps={{
+          sx: {
+            borderRadius: { xs: 0, sm: '12px' },
+            m: { xs: 0, sm: 2 }
+          }
+        }}
+      >
+        <DialogTitle sx={{ 
+          fontFamily: '"Instrument Serif", serif', 
+          fontSize: { xs: 20, sm: 24 },
+          px: { xs: 2, sm: 3 },
+          pt: { xs: 2, sm: 2.5 }
+        }}>
           {editingClass ? 'Editar Clase' : 'Crear Nueva Clase'}
         </DialogTitle>
-        <DialogContent>
+        <DialogContent sx={{ px: { xs: 2, sm: 3 } }}>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
             {error && (
-              <Alert severity="error" onClose={() => setError('')} sx={{ borderRadius: '10px' }}>
+              <Alert severity="error" onClose={() => setError('')} sx={{ borderRadius: '10px', fontSize: { xs: 12, sm: 13 } }}>
                 {error}
               </Alert>
             )}
@@ -333,6 +410,11 @@ const AdminClasses = () => {
               size="small"
               placeholder="Ej: 1° Primaria, 6° Secundaria, 10° A"
               helperText="Ejemplos: 1° Primaria, 2° Primaria, 6° Secundaria, 10° A"
+              sx={{
+                '& .MuiInputLabel-root': { fontSize: { xs: 12, sm: 13 } },
+                '& .MuiInputBase-root': { fontSize: { xs: 12, sm: 13 } },
+                '& .MuiFormHelperText-root': { fontSize: { xs: 10, sm: 11 } }
+              }}
             />
             
             <TextField
@@ -346,6 +428,11 @@ const AdminClasses = () => {
               size="small"
               placeholder="Ej: 1, 2, 3..."
               helperText="Número de orden (1 = primer grado, 2 = segundo grado, etc.)"
+              sx={{
+                '& .MuiInputLabel-root': { fontSize: { xs: 12, sm: 13 } },
+                '& .MuiInputBase-root': { fontSize: { xs: 12, sm: 13 } },
+                '& .MuiFormHelperText-root': { fontSize: { xs: 10, sm: 11 } }
+              }}
             />
             
             <TextField
@@ -358,12 +445,16 @@ const AdminClasses = () => {
               fullWidth
               size="small"
               disabled={schoolYears.length === 0}
+              sx={{
+                '& .MuiInputLabel-root': { fontSize: { xs: 12, sm: 13 } },
+                '& .MuiInputBase-root': { fontSize: { xs: 12, sm: 13 } }
+              }}
             >
               {schoolYears.length === 0 ? (
-                <MenuItem disabled>No hay años escolares creados</MenuItem>
+                <MenuItem disabled sx={{ fontSize: { xs: 12, sm: 13 } }}>No hay años escolares creados</MenuItem>
               ) : (
                 schoolYears.map((year) => (
-                  <MenuItem key={year.id} value={year.id}>
+                  <MenuItem key={year.id} value={year.id} sx={{ fontSize: { xs: 12, sm: 13 } }}>
                     {year.name}
                   </MenuItem>
                 ))
@@ -379,11 +470,14 @@ const AdminClasses = () => {
                 />
               }
               label="Clase activa"
+              sx={{
+                '& .MuiFormControlLabel-label': { fontSize: { xs: 12, sm: 13 } }
+              }}
             />
           </Box>
         </DialogContent>
-        <DialogActions sx={{ p: 2, pt: 0 }}>
-          <Button onClick={handleCloseDialog} sx={{ color: '#888' }}>
+        <DialogActions sx={{ p: { xs: 2, sm: 2.5 }, pt: 0 }}>
+          <Button onClick={handleCloseDialog} sx={{ fontSize: { xs: 12, sm: 13 } }}>
             Cancelar
           </Button>
           <Button
@@ -392,7 +486,9 @@ const AdminClasses = () => {
             sx={{
               background: 'linear-gradient(135deg, #1A1A2E 0%, #2D2B55 100%)',
               '&:hover': { opacity: 0.9 },
-              textTransform: 'none'
+              textTransform: 'none',
+              fontSize: { xs: 12, sm: 13 },
+              px: { xs: 2, sm: 3 }
             }}
           >
             {editingClass ? 'Actualizar' : 'Crear'}
@@ -406,7 +502,7 @@ const AdminClasses = () => {
         onClose={() => setSuccess('')}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
-        <Alert severity="success" onClose={() => setSuccess('')} sx={{ borderRadius: '10px' }}>
+        <Alert severity="success" onClose={() => setSuccess('')} sx={{ borderRadius: '10px', fontSize: { xs: 12, sm: 13 } }}>
           {success}
         </Alert>
       </Snackbar>

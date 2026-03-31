@@ -24,13 +24,19 @@ import {
   CircularProgress,
   FormControl,
   InputLabel,
-  Select
+  Select,
+  useMediaQuery,
+  useTheme
 } from '@mui/material'
 import { Add, Edit, Delete, ArrowBack, School, Person } from '@mui/icons-material'
 import api from '../../services/api'
 
 const AdminAssignments = () => {
   const navigate = useNavigate()
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
+  const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'))
+  
   const [assignments, setAssignments] = useState([])
   const [teachers, setTeachers] = useState([])
   const [grades, setGrades] = useState([])
@@ -67,28 +73,22 @@ const AdminAssignments = () => {
   const fetchData = async () => {
     setLoading(true)
     try {
-      // Obtener todas las asignaciones
       const assignmentsRes = await api.get('/academics/teacher-assignments/')
       setAssignments(extractDataFromResponse(assignmentsRes))
 
-      // Obtener profesores
       const teachersRes = await api.get('/users/list/')
       const allUsers = extractDataFromResponse(teachersRes)
       setTeachers(allUsers.filter(u => u.role === 'teacher'))
 
-      // Obtener grados
       const gradesRes = await api.get('/academics/grades/')
       setGrades(extractDataFromResponse(gradesRes))
 
-      // Obtener materias
       const subjectsRes = await api.get('/academics/subjects/')
       setSubjects(extractDataFromResponse(subjectsRes))
 
-      // Obtener años escolares
       const yearsRes = await api.get('/academics/school-years/')
       setSchoolYears(extractDataFromResponse(yearsRes))
       
-      // Seleccionar año activo por defecto
       const activeYear = extractDataFromResponse(yearsRes).find(y => y.is_active)
       if (activeYear && !editingAssignment) {
         setFormData(prev => ({ ...prev, school_year: activeYear.id }))
@@ -199,19 +199,46 @@ const AdminAssignments = () => {
   }
 
   return (
-    <Box sx={{ p: 3 }}>
-      {/* Header */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+    <Box sx={{ 
+      p: { xs: 1.5, sm: 2, md: 3 },
+      maxWidth: '100%',
+      overflowX: 'hidden'
+    }}>
+      {/* Header Responsive */}
+      <Box sx={{ 
+        display: 'flex', 
+        flexDirection: { xs: 'column', sm: 'row' },
+        justifyContent: 'space-between', 
+        alignItems: { xs: 'flex-start', sm: 'center' }, 
+        gap: { xs: 2, sm: 0 },
+        mb: { xs: 2, sm: 3 }
+      }}>
+        <Box sx={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: { xs: 1, sm: 2 },
+          flexWrap: 'wrap'
+        }}>
           <Button 
             variant="outlined" 
             onClick={() => navigate('/admin')}
             startIcon={<ArrowBack />}
-            sx={{ borderRadius: '8px' }}
+            sx={{ 
+              borderRadius: '8px',
+              px: { xs: 1.5, sm: 2 },
+              py: { xs: 0.5, sm: 0.75 },
+              fontSize: { xs: 12, sm: 13 }
+            }}
           >
             Volver
           </Button>
-          <Typography variant="h4" sx={{ fontFamily: '"Instrument Serif", serif' }}>
+          <Typography 
+            variant="h4" 
+            sx={{ 
+              fontFamily: '"Instrument Serif", serif',
+              fontSize: { xs: 20, sm: 28, md: 32 }
+            }}
+          >
             Asignación de Profesores
           </Typography>
         </Box>
@@ -223,39 +250,57 @@ const AdminAssignments = () => {
             background: 'linear-gradient(135deg, #1A1A2E 0%, #2D2B55 100%)',
             '&:hover': { opacity: 0.9 },
             borderRadius: '10px',
-            textTransform: 'none'
+            textTransform: 'none',
+            px: { xs: 2, sm: 3 },
+            py: { xs: 0.75, sm: 1 },
+            fontSize: { xs: 12, sm: 13 },
+            width: { xs: '100%', sm: 'auto' }
           }}
         >
           Nueva Asignación
         </Button>
       </Box>
 
-      {/* Tabla de asignaciones */}
-      <TableContainer component={Paper} sx={{ borderRadius: '14px', border: '0.5px solid #E0DDD8' }}>
-        <Table>
+      {/* Tabla de asignaciones - Responsive con scroll horizontal */}
+      <TableContainer 
+        component={Paper} 
+        sx={{ 
+          borderRadius: '14px', 
+          border: '0.5px solid #E0DDD8',
+          overflowX: 'auto'
+        }}
+      >
+        <Table sx={{ minWidth: isMobile ? 600 : 'auto' }}>
           <TableHead>
             <TableRow sx={{ background: '#F5F3EE' }}>
-              <TableCell sx={{ fontWeight: 600 }}>Profesor</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>Clase/Grado</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>Materia</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>Año Escolar</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>Estado</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>Acciones</TableCell>
+              <TableCell sx={{ fontWeight: 600, fontSize: { xs: 12, sm: 13 } }}>Profesor</TableCell>
+              {!isMobile && (
+                <>
+                  <TableCell sx={{ fontWeight: 600, fontSize: { xs: 12, sm: 13 } }}>Clase/Grado</TableCell>
+                  <TableCell sx={{ fontWeight: 600, fontSize: { xs: 12, sm: 13 } }}>Materia</TableCell>
+                </>
+              )}
+              {isMobile && (
+                <TableCell sx={{ fontWeight: 600, fontSize: { xs: 12, sm: 13 } }}>Clase/Materia</TableCell>
+              )}
+              <TableCell sx={{ fontWeight: 600, fontSize: { xs: 12, sm: 13 } }}>Año</TableCell>
+              <TableCell sx={{ fontWeight: 600, fontSize: { xs: 12, sm: 13 } }}>Estado</TableCell>
+              <TableCell sx={{ fontWeight: 600, fontSize: { xs: 12, sm: 13 } }}>Acciones</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {assignments.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={6} align="center">
-                  <Box sx={{ py: 4, textAlign: 'center' }}>
-                    <School sx={{ fontSize: 48, color: '#CCC', mb: 1 }} />
-                    <Typography sx={{ color: '#AAA' }}>
+                  <Box sx={{ py: { xs: 3, sm: 4 }, textAlign: 'center' }}>
+                    <School sx={{ fontSize: { xs: 36, sm: 48 }, color: '#CCC', mb: 1 }} />
+                    <Typography sx={{ color: '#AAA', fontSize: { xs: 12, sm: 13 } }}>
                       No hay asignaciones de profesores
                     </Typography>
                     <Button
                       variant="outlined"
                       onClick={() => handleOpenDialog()}
-                      sx={{ mt: 2 }}
+                      sx={{ mt: 2, fontSize: { xs: 11, sm: 12 } }}
                     >
                       Crear primera asignación
                     </Button>
@@ -267,22 +312,44 @@ const AdminAssignments = () => {
                 <TableRow key={assignment.id} hover>
                   <TableCell>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Person sx={{ fontSize: 16, color: '#6C63FF' }} />
-                      <Typography sx={{ fontWeight: 500 }}>
+                      <Person sx={{ fontSize: { xs: 14, sm: 16 }, color: '#6C63FF' }} />
+                      <Typography sx={{ 
+                        fontWeight: 500, 
+                        fontSize: { xs: 12, sm: 13 },
+                        wordBreak: 'break-word'
+                      }}>
                         {getTeacherName(assignment.teacher)}
                       </Typography>
                     </Box>
                   </TableCell>
-                  <TableCell>{getGradeName(assignment.grade)}</TableCell>
-                  <TableCell>{getSubjectName(assignment.subject)}</TableCell>
-                  <TableCell>{assignment.school_year_name || assignment.school_year}</TableCell>
+                  {!isMobile ? (
+                    <>
+                      <TableCell sx={{ fontSize: { xs: 12, sm: 13 } }}>
+                        {getGradeName(assignment.grade)}
+                      </TableCell>
+                      <TableCell sx={{ fontSize: { xs: 12, sm: 13 } }}>
+                        {getSubjectName(assignment.subject)}
+                      </TableCell>
+                    </>
+                  ) : (
+                    <TableCell sx={{ fontSize: { xs: 12, sm: 13 } }}>
+                      <Typography variant="caption" display="block" sx={{ fontSize: 11, color: '#888' }}>
+                        {getGradeName(assignment.grade)}
+                      </Typography>
+                      {getSubjectName(assignment.subject)}
+                    </TableCell>
+                  )}
+                  <TableCell sx={{ fontSize: { xs: 12, sm: 13 } }}>
+                    {assignment.school_year_name || assignment.school_year}
+                  </TableCell>
                   <TableCell>
                     <Chip
                       label={assignment.is_active ? 'Activo' : 'Inactivo'}
                       sx={{
                         backgroundColor: assignment.is_active ? '#10B98120' : '#EF444420',
                         color: assignment.is_active ? '#10B981' : '#EF4444',
-                        fontSize: 12
+                        fontSize: { xs: 10, sm: 12 },
+                        height: { xs: 24, sm: 32 }
                       }}
                     />
                   </TableCell>
@@ -290,14 +357,14 @@ const AdminAssignments = () => {
                     <IconButton 
                       size="small" 
                       onClick={() => handleOpenDialog(assignment)}
-                      sx={{ color: '#6C63FF' }}
+                      sx={{ color: '#6C63FF', p: { xs: 0.5, sm: 0.75 } }}
                     >
                       <Edit fontSize="small" />
                     </IconButton>
                     <IconButton 
                       size="small" 
                       onClick={() => handleDeleteAssignment(assignment.id)}
-                      sx={{ color: '#EF4444' }}
+                      sx={{ color: '#EF4444', p: { xs: 0.5, sm: 0.75 } }}
                     >
                       <Delete fontSize="small" />
                     </IconButton>
@@ -309,32 +376,50 @@ const AdminAssignments = () => {
         </Table>
       </TableContainer>
 
-      {/* Dialog para crear/editar asignación */}
-      <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
-        <DialogTitle sx={{ fontFamily: '"Instrument Serif", serif', fontSize: 24 }}>
+      {/* Dialog Responsive */}
+      <Dialog 
+        open={openDialog} 
+        onClose={handleCloseDialog} 
+        maxWidth="sm" 
+        fullWidth
+        fullScreen={isMobile}
+        PaperProps={{
+          sx: {
+            borderRadius: { xs: 0, sm: '12px' },
+            m: { xs: 0, sm: 2 }
+          }
+        }}
+      >
+        <DialogTitle sx={{ 
+          fontFamily: '"Instrument Serif", serif', 
+          fontSize: { xs: 20, sm: 24 },
+          px: { xs: 2, sm: 3 },
+          pt: { xs: 2, sm: 2.5 }
+        }}>
           {editingAssignment ? 'Editar Asignación' : 'Nueva Asignación'}
         </DialogTitle>
-        <DialogContent>
+        <DialogContent sx={{ px: { xs: 2, sm: 3 } }}>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
             {error && (
-              <Alert severity="error" onClose={() => setError('')} sx={{ borderRadius: '10px' }}>
+              <Alert severity="error" onClose={() => setError('')} sx={{ borderRadius: '10px', fontSize: { xs: 12, sm: 13 } }}>
                 {error}
               </Alert>
             )}
             
             <FormControl fullWidth size="small" required>
-              <InputLabel>Profesor</InputLabel>
+              <InputLabel sx={{ fontSize: { xs: 12, sm: 13 } }}>Profesor</InputLabel>
               <Select
                 name="teacher"
                 value={formData.teacher}
                 onChange={handleChange}
                 label="Profesor"
+                sx={{ fontSize: { xs: 12, sm: 13 } }}
               >
                 {teachers.length === 0 ? (
-                  <MenuItem disabled>No hay profesores registrados</MenuItem>
+                  <MenuItem disabled sx={{ fontSize: { xs: 12, sm: 13 } }}>No hay profesores registrados</MenuItem>
                 ) : (
                   teachers.map((teacher) => (
-                    <MenuItem key={teacher.id} value={teacher.id}>
+                    <MenuItem key={teacher.id} value={teacher.id} sx={{ fontSize: { xs: 12, sm: 13 } }}>
                       {`${teacher.first_name} ${teacher.last_name}`.trim() || teacher.username}
                     </MenuItem>
                   ))
@@ -343,18 +428,19 @@ const AdminAssignments = () => {
             </FormControl>
 
             <FormControl fullWidth size="small" required>
-              <InputLabel>Clase / Grado</InputLabel>
+              <InputLabel sx={{ fontSize: { xs: 12, sm: 13 } }}>Clase / Grado</InputLabel>
               <Select
                 name="grade"
                 value={formData.grade}
                 onChange={handleChange}
                 label="Clase / Grado"
+                sx={{ fontSize: { xs: 12, sm: 13 } }}
               >
                 {grades.length === 0 ? (
-                  <MenuItem disabled>No hay clases registradas</MenuItem>
+                  <MenuItem disabled sx={{ fontSize: { xs: 12, sm: 13 } }}>No hay clases registradas</MenuItem>
                 ) : (
                   grades.map((grade) => (
-                    <MenuItem key={grade.id} value={grade.id}>
+                    <MenuItem key={grade.id} value={grade.id} sx={{ fontSize: { xs: 12, sm: 13 } }}>
                       {grade.name}
                     </MenuItem>
                   ))
@@ -363,18 +449,19 @@ const AdminAssignments = () => {
             </FormControl>
 
             <FormControl fullWidth size="small" required>
-              <InputLabel>Materia</InputLabel>
+              <InputLabel sx={{ fontSize: { xs: 12, sm: 13 } }}>Materia</InputLabel>
               <Select
                 name="subject"
                 value={formData.subject}
                 onChange={handleChange}
                 label="Materia"
+                sx={{ fontSize: { xs: 12, sm: 13 } }}
               >
                 {subjects.length === 0 ? (
-                  <MenuItem disabled>No hay materias registradas</MenuItem>
+                  <MenuItem disabled sx={{ fontSize: { xs: 12, sm: 13 } }}>No hay materias registradas</MenuItem>
                 ) : (
                   subjects.map((subject) => (
-                    <MenuItem key={subject.id} value={subject.id}>
+                    <MenuItem key={subject.id} value={subject.id} sx={{ fontSize: { xs: 12, sm: 13 } }}>
                       {subject.name}
                     </MenuItem>
                   ))
@@ -383,18 +470,19 @@ const AdminAssignments = () => {
             </FormControl>
 
             <FormControl fullWidth size="small" required>
-              <InputLabel>Año Escolar</InputLabel>
+              <InputLabel sx={{ fontSize: { xs: 12, sm: 13 } }}>Año Escolar</InputLabel>
               <Select
                 name="school_year"
                 value={formData.school_year}
                 onChange={handleChange}
                 label="Año Escolar"
+                sx={{ fontSize: { xs: 12, sm: 13 } }}
               >
                 {schoolYears.length === 0 ? (
-                  <MenuItem disabled>No hay años escolares registrados</MenuItem>
+                  <MenuItem disabled sx={{ fontSize: { xs: 12, sm: 13 } }}>No hay años escolares registrados</MenuItem>
                 ) : (
                   schoolYears.map((year) => (
-                    <MenuItem key={year.id} value={year.id}>
+                    <MenuItem key={year.id} value={year.id} sx={{ fontSize: { xs: 12, sm: 13 } }}>
                       {year.name} {year.is_active ? '(Activo)' : ''}
                     </MenuItem>
                   ))
@@ -403,27 +491,32 @@ const AdminAssignments = () => {
             </FormControl>
 
             <FormControl fullWidth size="small">
-              <InputLabel>Estado</InputLabel>
+              <InputLabel sx={{ fontSize: { xs: 12, sm: 13 } }}>Estado</InputLabel>
               <Select
                 name="is_active"
                 value={formData.is_active}
                 onChange={handleChange}
                 label="Estado"
+                sx={{ fontSize: { xs: 12, sm: 13 } }}
               >
-                <MenuItem value={true}>Activo</MenuItem>
-                <MenuItem value={false}>Inactivo</MenuItem>
+                <MenuItem value={true} sx={{ fontSize: { xs: 12, sm: 13 } }}>Activo</MenuItem>
+                <MenuItem value={false} sx={{ fontSize: { xs: 12, sm: 13 } }}>Inactivo</MenuItem>
               </Select>
             </FormControl>
           </Box>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDialog}>Cancelar</Button>
+        <DialogActions sx={{ p: { xs: 2, sm: 2.5 }, pt: 0 }}>
+          <Button onClick={handleCloseDialog} sx={{ fontSize: { xs: 12, sm: 13 } }}>
+            Cancelar
+          </Button>
           <Button
             onClick={handleSubmit}
             variant="contained"
             sx={{
               background: 'linear-gradient(135deg, #1A1A2E 0%, #2D2B55 100%)',
-              '&:hover': { opacity: 0.9 }
+              '&:hover': { opacity: 0.9 },
+              fontSize: { xs: 12, sm: 13 },
+              px: { xs: 2, sm: 3 }
             }}
           >
             {editingAssignment ? 'Actualizar' : 'Crear'}
@@ -437,7 +530,7 @@ const AdminAssignments = () => {
         onClose={() => setSuccess('')}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
-        <Alert severity="success" onClose={() => setSuccess('')} sx={{ borderRadius: '10px' }}>
+        <Alert severity="success" onClose={() => setSuccess('')} sx={{ borderRadius: '10px', fontSize: { xs: 12, sm: 13 } }}>
           {success}
         </Alert>
       </Snackbar>

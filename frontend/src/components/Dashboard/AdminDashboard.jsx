@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { Box, Typography, CircularProgress } from '@mui/material'
+import { Box, Typography, CircularProgress, useMediaQuery, useTheme } from '@mui/material'
 import {
   PeopleOutlined,
   SchoolOutlined,
@@ -24,89 +24,123 @@ import AdminEnrollments from '../admin/AdminEnrollments';
 
 const FONT = `@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap');`
 
-// ── Sub-componentes ───────────────────────────────────────────────────────────
+// ── Sub-componentes optimizados para responsive ───────────────────────────────────────────
 
-const StatTile = ({ label, value, sub, accent }) => (
-  <Box
-    sx={{
-      p: '20px 22px',
-      borderRadius: '14px',
-      border: '0.5px solid',
-      borderColor: 'divider',
-      background: '#fff',
-      display: 'flex',
-      flexDirection: 'column',
-      gap: 0.5,
-      transition: 'box-shadow .15s',
-      '&:hover': { boxShadow: '0 4px 20px rgba(0,0,0,0.06)' },
-    }}
-  >
-    <Typography sx={{ fontSize: 12, color: '#888', letterSpacing: '0.02em' }}>{label}</Typography>
-    <Typography
-      sx={{
-        fontFamily: '"Instrument Serif", serif',
-        fontSize: 38,
-        color: accent || '#1A1A2E',
-        lineHeight: 1,
-        letterSpacing: '-0.02em',
-      }}
-    >
-      {value}
-    </Typography>
-    {sub && (
-      <Typography sx={{ fontSize: 11, color: '#10B981', mt: 0.25 }}>{sub}</Typography>
-    )}
-  </Box>
-)
-
-const QuickAction = ({ icon, label, desc, onClick, color = '#1A1A2E' }) => (
-  <Box
-    onClick={onClick}
-    sx={{
-      display: 'flex',
-      alignItems: 'center',
-      gap: 2,
-      p: '14px 16px',
-      borderRadius: '12px',
-      border: '0.5px solid',
-      borderColor: 'divider',
-      background: '#fff',
-      cursor: 'pointer',
-      transition: 'all .15s',
-      '&:hover': {
-        borderColor: color,
-        background: `${color}08`,
-        transform: 'translateX(3px)',
-      },
-    }}
-  >
+const StatTile = ({ label, value, sub, accent }) => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  
+  return (
     <Box
       sx={{
-        width: 36,
-        height: 36,
-        borderRadius: '9px',
-        background: `${color}12`,
+        p: { xs: '12px 14px', sm: '16px 20px', md: '20px 22px' },
+        borderRadius: { xs: '10px', sm: '12px', md: '14px' },
+        border: '0.5px solid',
+        borderColor: 'divider',
+        background: '#fff',
         display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        color,
-        flexShrink: 0,
+        flexDirection: 'column',
+        gap: 0.5,
+        transition: 'box-shadow .15s',
+        '&:hover': { boxShadow: '0 4px 20px rgba(0,0,0,0.06)' },
       }}
     >
-      {React.cloneElement(icon, { sx: { fontSize: 18 } })}
-    </Box>
-    <Box sx={{ flex: 1, minWidth: 0 }}>
-      <Typography sx={{ fontSize: 13, fontWeight: 500, color: '#1A1A2E' }}>{label}</Typography>
-      {desc && (
-        <Typography sx={{ fontSize: 11, color: '#AAA', mt: 0.1 }}>{desc}</Typography>
+      <Typography sx={{ 
+        fontSize: { xs: 10, sm: 11, md: 12 }, 
+        color: '#888', 
+        letterSpacing: '0.02em' 
+      }}>
+        {label}
+      </Typography>
+      <Typography
+        sx={{
+          fontFamily: '"Instrument Serif", serif',
+          fontSize: { xs: 24, sm: 32, md: 38 },
+          color: accent || '#1A1A2E',
+          lineHeight: 1,
+          letterSpacing: '-0.02em',
+        }}
+      >
+        {value}
+      </Typography>
+      {sub && (
+        <Typography sx={{ fontSize: { xs: 9, sm: 10, md: 11 }, color: '#10B981', mt: 0.25 }}>
+          {sub}
+        </Typography>
       )}
     </Box>
-    <ArrowForwardOutlined sx={{ fontSize: 14, color: '#CCC', flexShrink: 0 }} />
-  </Box>
-)
+  )
+}
 
-// ── Componente de actividad reciente ──
+const QuickAction = ({ icon, label, desc, onClick, color = '#1A1A2E' }) => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  
+  return (
+    <Box
+      onClick={onClick}
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: { xs: 1.5, sm: 2 },
+        p: { xs: '10px 12px', sm: '12px 14px', md: '14px 16px' },
+        borderRadius: { xs: '10px', sm: '11px', md: '12px' },
+        border: '0.5px solid',
+        borderColor: 'divider',
+        background: '#fff',
+        cursor: 'pointer',
+        transition: 'all .15s',
+        '&:hover': {
+          borderColor: color,
+          background: `${color}08`,
+          transform: 'translateX(3px)',
+        },
+      }}
+    >
+      <Box
+        sx={{
+          width: { xs: 28, sm: 32, md: 36 },
+          height: { xs: 28, sm: 32, md: 36 },
+          borderRadius: { xs: '7px', sm: '8px', md: '9px' },
+          background: `${color}12`,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          color,
+          flexShrink: 0,
+        }}
+      >
+        {React.cloneElement(icon, { sx: { fontSize: { xs: 14, sm: 16, md: 18 } } })}
+      </Box>
+      <Box sx={{ flex: 1, minWidth: 0 }}>
+        <Typography sx={{ 
+          fontSize: { xs: 12, sm: 12.5, md: 13 }, 
+          fontWeight: 500, 
+          color: '#1A1A2E' 
+        }}>
+          {label}
+        </Typography>
+        {desc && !isMobile && (
+          <Typography sx={{ fontSize: { xs: 10, sm: 10.5, md: 11 }, color: '#AAA', mt: 0.1 }}>
+            {desc}
+          </Typography>
+        )}
+        {desc && isMobile && (
+          <Typography sx={{ fontSize: 10, color: '#AAA', mt: 0.1 }}>
+            {desc.length > 30 ? `${desc.substring(0, 30)}...` : desc}
+          </Typography>
+        )}
+      </Box>
+      <ArrowForwardOutlined sx={{ fontSize: { xs: 12, sm: 13, md: 14 }, color: '#CCC', flexShrink: 0 }} />
+    </Box>
+  )
+}
+
+// ── Componente de actividad reciente optimizado ──
 const RecentActivity = ({ activities, loading }) => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  
   if (loading) {
     return (
       <Box display="flex" justifyContent="center" py={4}>
@@ -118,7 +152,7 @@ const RecentActivity = ({ activities, loading }) => {
   if (!activities || activities.length === 0) {
     return (
       <Box sx={{ textAlign: 'center', py: 4 }}>
-        <Typography sx={{ fontSize: 13, color: '#AAA' }}>
+        <Typography sx={{ fontSize: { xs: 12, sm: 13 }, color: '#AAA' }}>
           No hay actividad reciente
         </Typography>
       </Box>
@@ -147,23 +181,23 @@ const RecentActivity = ({ activities, loading }) => {
 
   return (
     <Box>
-      {activities.map((activity, index) => (
+      {activities.slice(0, isMobile ? 3 : 5).map((activity, index) => (
         <Box
           key={activity.id || index}
           sx={{
             display: 'flex',
             alignItems: 'center',
-            gap: 2,
-            py: 1.5,
+            gap: { xs: 1.5, sm: 2 },
+            py: { xs: 1.2, sm: 1.5 },
             borderBottom: index < activities.length - 1 ? '0.5px solid #F5F3EE' : 'none',
             '&:last-child': { borderBottom: 'none', pb: 0 },
           }}
         >
           <Box
             sx={{
-              width: 32,
-              height: 32,
-              borderRadius: '8px',
+              width: { xs: 28, sm: 30, md: 32 },
+              height: { xs: 28, sm: 30, md: 32 },
+              borderRadius: { xs: '7px', sm: '7.5px', md: '8px' },
               background: `${getTagColor(activity.type)}12`,
               display: 'flex',
               alignItems: 'center',
@@ -172,35 +206,50 @@ const RecentActivity = ({ activities, loading }) => {
               flexShrink: 0,
             }}
           >
-            {React.cloneElement(getIconByType(activity.type), { sx: { fontSize: 15 } })}
+            {React.cloneElement(getIconByType(activity.type), { sx: { fontSize: { xs: 13, sm: 14, md: 15 } } })}
           </Box>
           <Box sx={{ flex: 1, minWidth: 0 }}>
-            <Typography sx={{ fontSize: 13, color: '#1A1A2E' }}>{activity.title}</Typography>
-            <Typography sx={{ fontSize: 11, color: '#AAA' }}>{activity.time}</Typography>
+            <Typography sx={{ 
+              fontSize: { xs: 11.5, sm: 12, md: 13 }, 
+              color: '#1A1A2E',
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis'
+            }}>
+              {activity.title}
+            </Typography>
+            <Typography sx={{ fontSize: { xs: 9, sm: 10, md: 11 }, color: '#AAA' }}>
+              {activity.time}
+            </Typography>
           </Box>
-          <Box
-            sx={{
-              px: 1.25,
-              py: 0.4,
-              borderRadius: '20px',
-              background: `${getTagColor(activity.type)}12`,
-              color: getTagColor(activity.type),
-              fontSize: 11,
-              fontWeight: 500,
-              flexShrink: 0,
-            }}
-          >
-            {activity.tag}
-          </Box>
+          {!isMobile && (
+            <Box
+              sx={{
+                px: 1.25,
+                py: 0.4,
+                borderRadius: '20px',
+                background: `${getTagColor(activity.type)}12`,
+                color: getTagColor(activity.type),
+                fontSize: 11,
+                fontWeight: 500,
+                flexShrink: 0,
+              }}
+            >
+              {activity.tag}
+            </Box>
+          )}
         </Box>
       ))}
     </Box>
   )
 }
 
-// ── Componente Dashboard Principal ──
+// ── Componente Dashboard Principal optimizado ──
 const DashboardHome = ({ stats, navigate, recentActivities, activitiesLoading }) => {
   const { user } = useAuth()
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
+  const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'))
 
   const approvalRate = stats.totalStudents > 0 
     ? Math.round(((stats.totalStudents - stats.failingStudents) / stats.totalStudents) * 100)
@@ -215,24 +264,31 @@ const DashboardHome = ({ stats, navigate, recentActivities, activitiesLoading })
       <Box
         sx={{
           display: 'flex',
+          flexDirection: { xs: 'column', sm: 'row' },
           justifyContent: 'space-between',
-          alignItems: 'flex-end',
-          mb: 4,
-          flexWrap: 'wrap',
-          gap: 2,
+          alignItems: { xs: 'flex-start', sm: 'flex-end' },
+          mb: { xs: 3, sm: 3.5, md: 4 },
+          gap: { xs: 2, sm: 1 },
         }}
       >
-        <Box>
-          <Typography sx={{ fontSize: 12, color: '#AAA', mb: 0.5, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+        <Box sx={{ width: '100%' }}>
+          <Typography sx={{ 
+            fontSize: { xs: 10, sm: 11, md: 12 }, 
+            color: '#AAA', 
+            mb: 0.5, 
+            letterSpacing: '0.06em', 
+            textTransform: 'uppercase' 
+          }}>
             Panel de administración
           </Typography>
           <Typography
             sx={{
               fontFamily: '"Instrument Serif", serif',
-              fontSize: { xs: 28, sm: 36 },
+              fontSize: { xs: 24, sm: 30, md: 36 },
               color: '#1A1A2E',
               letterSpacing: '-0.02em',
               lineHeight: 1.05,
+              wordBreak: 'break-word',
             }}
           >
             Hola, {user?.first_name || user?.username}
@@ -240,28 +296,34 @@ const DashboardHome = ({ stats, navigate, recentActivities, activitiesLoading })
         </Box>
         <Box
           sx={{
-            px: 2,
-            py: 1,
+            px: { xs: 1.5, sm: 2 },
+            py: { xs: 0.75, sm: 1 },
             borderRadius: '10px',
             background: '#1A1A2E',
             color: '#fff',
-            fontSize: 12,
+            fontSize: { xs: 10, sm: 11, md: 12 },
             display: 'flex',
             alignItems: 'center',
             gap: 0.75,
+            whiteSpace: 'nowrap',
           }}
         >
-          <SettingsOutlined sx={{ fontSize: 14 }} />
+          <SettingsOutlined sx={{ fontSize: { xs: 12, sm: 13, md: 14 } }} />
           Acceso completo
         </Box>
       </Box>
 
+      {/* Stats Grid - Responsive */}
       <Box
         sx={{
           display: 'grid',
-          gridTemplateColumns: { xs: 'repeat(2,1fr)', sm: 'repeat(3,1fr)', md: 'repeat(6,1fr)' },
-          gap: 1.5,
-          mb: 3,
+          gridTemplateColumns: { 
+            xs: 'repeat(2, 1fr)', 
+            sm: 'repeat(3, 1fr)', 
+            md: 'repeat(6, 1fr)' 
+          },
+          gap: { xs: 1, sm: 1.2, md: 1.5 },
+          mb: { xs: 2.5, sm: 3 },
         }}
       >
         <StatTile label="Usuarios" value={stats.totalUsers} />
@@ -272,48 +334,95 @@ const DashboardHome = ({ stats, navigate, recentActivities, activitiesLoading })
         <StatTile label="Materias" value={stats.totalSubjects} accent="#10B981" />
       </Box>
 
+      {/* Progress Cards - Responsive */}
       <Box
         sx={{
           display: 'grid',
-          gridTemplateColumns: { xs: '1fr', sm: 'repeat(3,1fr)' },
-          gap: 1.5,
-          mb: 3,
+          gridTemplateColumns: { xs: '1fr', sm: 'repeat(3, 1fr)' },
+          gap: { xs: 1, sm: 1.2, md: 1.5 },
+          mb: { xs: 2.5, sm: 3 },
         }}
       >
-        <Box sx={{ p: '16px 20px', borderRadius: '14px', border: '0.5px solid', borderColor: 'divider', background: '#fff' }}>
+        <Box sx={{ 
+          p: { xs: '12px 16px', sm: '14px 18px', md: '16px 20px' }, 
+          borderRadius: '14px', 
+          border: '0.5px solid', 
+          borderColor: 'divider', 
+          background: '#fff' 
+        }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', mb: 1.5 }}>
-            <Typography sx={{ fontSize: 12, color: '#888' }}>Tasa de aprobación</Typography>
-            <Typography sx={{ fontSize: 20, fontWeight: 500, color: '#10B981' }}>{approvalRate}%</Typography>
+            <Typography sx={{ fontSize: { xs: 10, sm: 11, md: 12 }, color: '#888' }}>Tasa de aprobación</Typography>
+            <Typography sx={{ fontSize: { xs: 16, sm: 18, md: 20 }, fontWeight: 500, color: '#10B981' }}>
+              {approvalRate}%
+            </Typography>
           </Box>
           <Box sx={{ height: 4, background: '#F0EDE8', borderRadius: 2, overflow: 'hidden' }}>
             <Box sx={{ width: `${approvalRate}%`, height: '100%', background: '#10B981', borderRadius: 2 }} />
           </Box>
         </Box>
         
-        <Box sx={{ p: '16px 20px', borderRadius: '14px', border: '0.5px solid', borderColor: 'divider', background: '#fff' }}>
+        <Box sx={{ 
+          p: { xs: '12px 16px', sm: '14px 18px', md: '16px 20px' }, 
+          borderRadius: '14px', 
+          border: '0.5px solid', 
+          borderColor: 'divider', 
+          background: '#fff' 
+        }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', mb: 1.5 }}>
-            <Typography sx={{ fontSize: 12, color: '#888' }}>Asistencia promedio</Typography>
-            <Typography sx={{ fontSize: 20, fontWeight: 500, color: '#6C63FF' }}>{attendanceRate}%</Typography>
+            <Typography sx={{ fontSize: { xs: 10, sm: 11, md: 12 }, color: '#888' }}>Asistencia promedio</Typography>
+            <Typography sx={{ fontSize: { xs: 16, sm: 18, md: 20 }, fontWeight: 500, color: '#6C63FF' }}>
+              {attendanceRate}%
+            </Typography>
           </Box>
           <Box sx={{ height: 4, background: '#F0EDE8', borderRadius: 2, overflow: 'hidden' }}>
             <Box sx={{ width: `${attendanceRate}%`, height: '100%', background: '#6C63FF', borderRadius: 2 }} />
           </Box>
         </Box>
         
-        <Box sx={{ p: '16px 20px', borderRadius: '14px', border: '0.5px solid', borderColor: 'divider', background: '#fff' }}>
+        <Box sx={{ 
+          p: { xs: '12px 16px', sm: '14px 18px', md: '16px 20px' }, 
+          borderRadius: '14px', 
+          border: '0.5px solid', 
+          borderColor: 'divider', 
+          background: '#fff' 
+        }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', mb: 1.5 }}>
-            <Typography sx={{ fontSize: 12, color: '#888' }}>Clases activas</Typography>
-            <Typography sx={{ fontSize: 20, fontWeight: 500, color: '#F59E0B' }}>{stats.activeClasses}</Typography>
+            <Typography sx={{ fontSize: { xs: 10, sm: 11, md: 12 }, color: '#888' }}>Clases activas</Typography>
+            <Typography sx={{ fontSize: { xs: 16, sm: 18, md: 20 }, fontWeight: 500, color: '#F59E0B' }}>
+              {stats.activeClasses}
+            </Typography>
           </Box>
           <Box sx={{ height: 4, background: '#F0EDE8', borderRadius: 2, overflow: 'hidden' }}>
-            <Box sx={{ width: `${Math.min((stats.activeClasses / stats.totalClasses) * 100, 100)}%`, height: '100%', background: '#F59E0B', borderRadius: 2 }} />
+            <Box sx={{ 
+              width: `${Math.min((stats.activeClasses / (stats.totalClasses || 1)) * 100, 100)}%`, 
+              height: '100%', 
+              background: '#F59E0B', 
+              borderRadius: 2 
+            }} />
           </Box>
         </Box>
       </Box>
 
-      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 2 }}>
-        <Box sx={{ p: 2.5, borderRadius: '14px', border: '0.5px solid', borderColor: 'divider', background: '#FAFAF8' }}>
-          <Typography sx={{ fontSize: 13, fontWeight: 500, color: '#1A1A2E', mb: 2 }}>
+      {/* Bottom Sections - Responsive */}
+      <Box sx={{ 
+        display: 'flex', 
+        flexDirection: { xs: 'column', md: 'row' },
+        gap: { xs: 1.5, sm: 2 }
+      }}>
+        <Box sx={{ 
+          flex: 1,
+          p: { xs: 1.5, sm: 2, md: 2.5 }, 
+          borderRadius: '14px', 
+          border: '0.5px solid', 
+          borderColor: 'divider', 
+          background: '#FAFAF8' 
+        }}>
+          <Typography sx={{ 
+            fontSize: { xs: 12, sm: 12.5, md: 13 }, 
+            fontWeight: 500, 
+            color: '#1A1A2E', 
+            mb: 1.5 
+          }}>
             Acciones rápidas
           </Typography>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
@@ -326,12 +435,25 @@ const DashboardHome = ({ stats, navigate, recentActivities, activitiesLoading })
           </Box>
         </Box>
 
-        <Box sx={{ p: 2.5, borderRadius: '14px', border: '0.5px solid', borderColor: 'divider', background: '#FAFAF8' }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-            <Typography sx={{ fontSize: 13, fontWeight: 500, color: '#1A1A2E' }}>
+        <Box sx={{ 
+          flex: 1,
+          p: { xs: 1.5, sm: 2, md: 2.5 }, 
+          borderRadius: '14px', 
+          border: '0.5px solid', 
+          borderColor: 'divider', 
+          background: '#FAFAF8' 
+        }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
+            <Typography sx={{ 
+              fontSize: { xs: 12, sm: 12.5, md: 13 }, 
+              fontWeight: 500, 
+              color: '#1A1A2E' 
+            }}>
               Actividad reciente
             </Typography>
-            <Typography sx={{ fontSize: 11, color: '#AAA' }}>Últimas 48h</Typography>
+            <Typography sx={{ fontSize: { xs: 9, sm: 10, md: 11 }, color: '#AAA' }}>
+              Últimas 48h
+            </Typography>
           </Box>
           <RecentActivity activities={recentActivities} loading={activitiesLoading} />
         </Box>
@@ -354,11 +476,11 @@ const extractDataFromResponse = (response) => {
 
 // ── Componente para rutas en desarrollo ──
 const ComingSoon = ({ title }) => (
-  <Box sx={{ textAlign: 'center', py: 8 }}>
-    <Typography variant="h5" sx={{ fontFamily: '"Instrument Serif", serif', mb: 2 }}>
+  <Box sx={{ textAlign: 'center', py: { xs: 6, sm: 7, md: 8 } }}>
+    <Typography variant="h5" sx={{ fontFamily: '"Instrument Serif", serif', mb: 2, fontSize: { xs: 20, sm: 24, md: 28 } }}>
       🚧 {title}
     </Typography>
-    <Typography sx={{ color: '#888' }}>
+    <Typography sx={{ color: '#888', fontSize: { xs: 12, sm: 13, md: 14 } }}>
       Esta funcionalidad estará disponible próximamente.
     </Typography>
   </Box>
@@ -511,7 +633,14 @@ const AdminDashboard = () => {
   return (
     <>
       <style>{FONT}</style>
-      <Box sx={{ fontFamily: '"DM Sans", sans-serif', maxWidth: 1100, pb: 4 }}>
+      <Box sx={{ 
+        fontFamily: '"DM Sans", sans-serif', 
+        maxWidth: { xs: '100%', sm: '95%', md: 1100 },
+        width: '100%',
+        mx: 'auto',
+        px: { xs: 1.5, sm: 2, md: 3 },
+        pb: { xs: 3, sm: 4, md: 4 }
+      }}>
         {renderContent()}
       </Box>
     </>

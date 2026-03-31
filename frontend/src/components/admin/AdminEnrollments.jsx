@@ -33,7 +33,9 @@ import {
   Grid,
   Card,
   CardContent,
-  Divider
+  Divider,
+  useMediaQuery,
+  useTheme
 } from '@mui/material'
 import {
   Add,
@@ -51,6 +53,10 @@ import api from '../../services/api'
 
 const AdminEnrollments = () => {
   const navigate = useNavigate()
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
+  const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'))
+  
   const [tabValue, setTabValue] = useState(0)
   const [enrollments, setEnrollments] = useState([])
   const [students, setStudents] = useState([])
@@ -94,20 +100,16 @@ const AdminEnrollments = () => {
   const fetchData = async () => {
     setLoading(true)
     try {
-      // Obtener matrículas
       const enrollmentsRes = await api.get('/academics/enrollments/')
       setEnrollments(extractDataFromResponse(enrollmentsRes))
 
-      // Obtener estudiantes
       const usersRes = await api.get('/users/list/')
       const allUsers = extractDataFromResponse(usersRes)
       setStudents(allUsers.filter(u => u.role === 'student'))
 
-      // Obtener grados
       const gradesRes = await api.get('/academics/grades/')
       setGrades(extractDataFromResponse(gradesRes))
 
-      // Obtener años escolares
       const yearsRes = await api.get('/academics/school-years/')
       const years = extractDataFromResponse(yearsRes)
       setSchoolYears(years)
@@ -125,7 +127,19 @@ const AdminEnrollments = () => {
     }
   }
 
-  // Matrícula individual
+  const handleDeleteEnrollment = async (enrollmentId) => {
+    if (window.confirm('¿Estás seguro de eliminar esta matrícula?')) {
+      try {
+        await api.delete(`/academics/enrollments/${enrollmentId}/`)
+        setSuccess('Matrícula eliminada exitosamente')
+        fetchData()
+      } catch (error) {
+        console.error('Error deleting enrollment:', error)
+        setError('Error al eliminar la matrícula')
+      }
+    }
+  }
+
   const handleOpenDialog = (enrollment = null) => {
     if (enrollment) {
       setEditingEnrollment(enrollment)
@@ -175,7 +189,6 @@ const AdminEnrollments = () => {
     }
   }
 
-  // Matrícula masiva - selección múltiple
   const handleOpenMassiveDialog = () => {
     setSelectedStudents([])
     setMassiveForm({
@@ -246,7 +259,6 @@ const AdminEnrollments = () => {
     }
   }
 
-  // Matrícula masiva por CSV
   const handleCsvUpload = (event) => {
     const file = event.target.files[0]
     if (!file) return
@@ -265,7 +277,6 @@ const AdminEnrollments = () => {
         }
       }
       
-      // Crear estudiantes desde CSV
       createStudentsFromCsv(studentsCsv)
     }
     reader.readAsText(file)
@@ -322,7 +333,6 @@ const AdminEnrollments = () => {
     return grade?.name || '—'
   }
 
-  // Obtener estudiantes no matriculados en un grado
   const getUnenrolledStudents = () => {
     const enrolledIds = enrollments.map(e => e.student)
     return students.filter(s => !enrolledIds.includes(s.id))
@@ -337,94 +347,174 @@ const AdminEnrollments = () => {
   }
 
   return (
-    <Box sx={{ p: 3 }}>
-      {/* Header */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+    <Box sx={{ 
+      p: { xs: 1.5, sm: 2, md: 3 },
+      maxWidth: '100%',
+      overflowX: 'hidden'
+    }}>
+      {/* Header Responsive */}
+      <Box sx={{ 
+        display: 'flex', 
+        flexDirection: { xs: 'column', sm: 'row' },
+        justifyContent: 'space-between', 
+        alignItems: { xs: 'flex-start', sm: 'center' }, 
+        gap: { xs: 2, sm: 0 },
+        mb: { xs: 2, sm: 3 }
+      }}>
+        <Box sx={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: { xs: 1, sm: 2 },
+          flexWrap: 'wrap'
+        }}>
           <Button 
             variant="outlined" 
             onClick={() => navigate('/admin')}
             startIcon={<ArrowBack />}
-            sx={{ borderRadius: '8px' }}
+            sx={{ 
+              borderRadius: '8px',
+              px: { xs: 1.5, sm: 2 },
+              py: { xs: 0.5, sm: 0.75 },
+              fontSize: { xs: 12, sm: 13 }
+            }}
           >
             Volver
           </Button>
-          <Typography variant="h4" sx={{ fontFamily: '"Instrument Serif", serif' }}>
+          <Typography 
+            variant="h4" 
+            sx={{ 
+              fontFamily: '"Instrument Serif", serif',
+              fontSize: { xs: 20, sm: 28, md: 32 }
+            }}
+          >
             Matrículas de Estudiantes
           </Typography>
         </Box>
-        <Box sx={{ display: 'flex', gap: 1 }}>
-          <Button
-            variant="outlined"
-            startIcon={<FileUpload />}
-            onClick={() => document.getElementById('csv-upload').click()}
-          >
-            Cargar CSV
-          </Button>
-          <input
-            id="csv-upload"
-            type="file"
-            accept=".csv"
-            style={{ display: 'none' }}
-            onChange={handleCsvUpload}
-          />
-          <Button
-            variant="outlined"
-            startIcon={<Download />}
-            onClick={downloadCsvTemplate}
-          >
-            Plantilla CSV
-          </Button>
-          <Button
-            variant="contained"
-            startIcon={<GroupAdd />}
-            onClick={handleOpenMassiveDialog}
-            sx={{
-              background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
-              '&:hover': { opacity: 0.9 }
-            }}
-          >
-            Matrícula Masiva
-          </Button>
-          <Button
-            variant="contained"
-            startIcon={<PersonAdd />}
-            onClick={() => handleOpenDialog()}
-            sx={{
-              background: 'linear-gradient(135deg, #1A1A2E 0%, #2D2B55 100%)',
-              '&:hover': { opacity: 0.9 }
-            }}
-          >
-            Matricular Individual
-          </Button>
+        
+        {/* Botones responsive - en columna en móvil */}
+        <Box sx={{ 
+          display: 'flex', 
+          flexDirection: { xs: 'column', sm: 'row' },
+          gap: 1,
+          width: { xs: '100%', sm: 'auto' }
+        }}>
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <Button
+              variant="outlined"
+              startIcon={<FileUpload />}
+              onClick={() => document.getElementById('csv-upload').click()}
+              sx={{ 
+                fontSize: { xs: 11, sm: 12 },
+                px: { xs: 1.5, sm: 2 },
+                py: { xs: 0.5, sm: 0.75 },
+                flex: { xs: 1, sm: 'none' }
+              }}
+            >
+              {isMobile ? 'CSV' : 'Cargar CSV'}
+            </Button>
+            <input
+              id="csv-upload"
+              type="file"
+              accept=".csv"
+              style={{ display: 'none' }}
+              onChange={handleCsvUpload}
+            />
+            <Button
+              variant="outlined"
+              startIcon={<Download />}
+              onClick={downloadCsvTemplate}
+              sx={{ 
+                fontSize: { xs: 11, sm: 12 },
+                px: { xs: 1.5, sm: 2 },
+                py: { xs: 0.5, sm: 0.75 },
+                flex: { xs: 1, sm: 'none' }
+              }}
+            >
+              {isMobile ? 'Plantilla' : 'Plantilla CSV'}
+            </Button>
+          </Box>
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <Button
+              variant="contained"
+              startIcon={<GroupAdd />}
+              onClick={handleOpenMassiveDialog}
+              sx={{
+                background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
+                '&:hover': { opacity: 0.9 },
+                fontSize: { xs: 11, sm: 12 },
+                px: { xs: 1.5, sm: 2 },
+                py: { xs: 0.5, sm: 0.75 },
+                flex: { xs: 1, sm: 'none' }
+              }}
+            >
+              {isMobile ? 'Masiva' : 'Matrícula Masiva'}
+            </Button>
+            <Button
+              variant="contained"
+              startIcon={<PersonAdd />}
+              onClick={() => handleOpenDialog()}
+              sx={{
+                background: 'linear-gradient(135deg, #1A1A2E 0%, #2D2B55 100%)',
+                '&:hover': { opacity: 0.9 },
+                fontSize: { xs: 11, sm: 12 },
+                px: { xs: 1.5, sm: 2 },
+                py: { xs: 0.5, sm: 0.75 },
+                flex: { xs: 1, sm: 'none' }
+              }}
+            >
+              {isMobile ? 'Individual' : 'Matricular Individual'}
+            </Button>
+          </Box>
         </Box>
       </Box>
 
-      <Tabs value={tabValue} onChange={(e, v) => setTabValue(v)} sx={{ mb: 3 }}>
+      {/* Tabs Responsive */}
+      <Tabs 
+        value={tabValue} 
+        onChange={(e, v) => setTabValue(v)} 
+        sx={{ 
+          mb: { xs: 2, sm: 3 },
+          '& .MuiTab-root': {
+            fontSize: { xs: 12, sm: 13 },
+            minWidth: { xs: 'auto', sm: 120 },
+            px: { xs: 1.5, sm: 2 }
+          }
+        }}
+        variant={isMobile ? "fullWidth" : "standard"}
+      >
         <Tab label="Matrículas Activas" />
-        <Tab label="Estudiantes sin Matricular" />
+        <Tab label="Sin Matricular" />
       </Tabs>
 
-      {/* Tabla de matrículas activas */}
+      {/* Tabla de matrículas activas - Responsive */}
       {tabValue === 0 && (
-        <TableContainer component={Paper} sx={{ borderRadius: '14px', border: '0.5px solid #E0DDD8' }}>
-          <Table>
+        <TableContainer 
+          component={Paper} 
+          sx={{ 
+            borderRadius: '14px', 
+            border: '0.5px solid #E0DDD8',
+            overflowX: 'auto'
+          }}
+        >
+          <Table sx={{ minWidth: isMobile ? 500 : 'auto' }}>
             <TableHead>
               <TableRow sx={{ background: '#F5F3EE' }}>
-                <TableCell sx={{ fontWeight: 600 }}>Estudiante</TableCell>
-                <TableCell sx={{ fontWeight: 600 }}>Grado</TableCell>
-                <TableCell sx={{ fontWeight: 600 }}>Año Escolar</TableCell>
-                <TableCell sx={{ fontWeight: 600 }}>Estado</TableCell>
-                <TableCell sx={{ fontWeight: 600 }}>Acciones</TableCell>
+                <TableCell sx={{ fontWeight: 600, fontSize: { xs: 12, sm: 13 } }}>Estudiante</TableCell>
+                <TableCell sx={{ fontWeight: 600, fontSize: { xs: 12, sm: 13 } }}>Grado</TableCell>
+                {!isMobile && (
+                  <TableCell sx={{ fontWeight: 600, fontSize: { xs: 12, sm: 13 } }}>Año Escolar</TableCell>
+                )}
+                <TableCell sx={{ fontWeight: 600, fontSize: { xs: 12, sm: 13 } }}>Estado</TableCell>
+                <TableCell sx={{ fontWeight: 600, fontSize: { xs: 12, sm: 13 } }}>Acciones</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {enrollments.filter(e => e.is_active).length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} align="center">
-                    <Box sx={{ py: 4, textAlign: 'center' }}>
-                      <School sx={{ fontSize: 48, color: '#CCC', mb: 1 }} />
-                      <Typography sx={{ color: '#AAA' }}>
+                  <TableCell colSpan={isMobile ? 4 : 5} align="center">
+                    <Box sx={{ py: { xs: 3, sm: 4 }, textAlign: 'center' }}>
+                      <School sx={{ fontSize: { xs: 36, sm: 48 }, color: '#CCC', mb: 1 }} />
+                      <Typography sx={{ color: '#AAA', fontSize: { xs: 12, sm: 13 } }}>
                         No hay estudiantes matriculados
                       </Typography>
                     </Box>
@@ -433,15 +523,25 @@ const AdminEnrollments = () => {
               ) : (
                 enrollments.filter(e => e.is_active).map((enrollment) => (
                   <TableRow key={enrollment.id} hover>
-                    <TableCell>{getStudentName(enrollment.student)}</TableCell>
-                    <TableCell>{getGradeName(enrollment.grade)}</TableCell>
-                    <TableCell>{enrollment.school_year_name || enrollment.school_year}</TableCell>
+                    <TableCell sx={{ fontSize: { xs: 12, sm: 13 }, wordBreak: 'break-word' }}>
+                      {getStudentName(enrollment.student)}
+                    </TableCell>
+                    <TableCell sx={{ fontSize: { xs: 12, sm: 13 } }}>
+                      {getGradeName(enrollment.grade)}
+                    </TableCell>
+                    {!isMobile && (
+                      <TableCell sx={{ fontSize: { xs: 12, sm: 13 } }}>
+                        {enrollment.school_year_name || enrollment.school_year}
+                      </TableCell>
+                    )}
                     <TableCell>
                       <Chip
                         label={enrollment.is_active ? 'Activo' : 'Inactivo'}
                         sx={{
                           backgroundColor: enrollment.is_active ? '#10B98120' : '#EF444420',
-                          color: enrollment.is_active ? '#10B981' : '#EF4444'
+                          color: enrollment.is_active ? '#10B981' : '#EF4444',
+                          fontSize: { xs: 10, sm: 12 },
+                          height: { xs: 24, sm: 32 }
                         }}
                       />
                     </TableCell>
@@ -449,14 +549,14 @@ const AdminEnrollments = () => {
                       <IconButton 
                         size="small" 
                         onClick={() => handleOpenDialog(enrollment)}
-                        sx={{ color: '#6C63FF' }}
+                        sx={{ color: '#6C63FF', p: { xs: 0.5, sm: 0.75 } }}
                       >
                         <Edit fontSize="small" />
                       </IconButton>
                       <IconButton 
                         size="small" 
                         onClick={() => handleDeleteEnrollment(enrollment.id)}
-                        sx={{ color: '#EF4444' }}
+                        sx={{ color: '#EF4444', p: { xs: 0.5, sm: 0.75 } }}
                       >
                         <Delete fontSize="small" />
                       </IconButton>
@@ -469,22 +569,29 @@ const AdminEnrollments = () => {
         </TableContainer>
       )}
 
-      {/* Tabla de estudiantes sin matricular */}
+      {/* Tabla de estudiantes sin matricular - Responsive */}
       {tabValue === 1 && (
-        <TableContainer component={Paper} sx={{ borderRadius: '14px', border: '0.5px solid #E0DDD8' }}>
-          <Table>
+        <TableContainer 
+          component={Paper} 
+          sx={{ 
+            borderRadius: '14px', 
+            border: '0.5px solid #E0DDD8',
+            overflowX: 'auto'
+          }}
+        >
+          <Table sx={{ minWidth: isMobile ? 400 : 'auto' }}>
             <TableHead>
               <TableRow sx={{ background: '#F5F3EE' }}>
-                <TableCell sx={{ fontWeight: 600 }}>Estudiante</TableCell>
-                <TableCell sx={{ fontWeight: 600 }}>Email</TableCell>
-                <TableCell sx={{ fontWeight: 600 }}>Acciones</TableCell>
+                <TableCell sx={{ fontWeight: 600, fontSize: { xs: 12, sm: 13 } }}>Estudiante</TableCell>
+                <TableCell sx={{ fontWeight: 600, fontSize: { xs: 12, sm: 13 } }}>Email</TableCell>
+                <TableCell sx={{ fontWeight: 600, fontSize: { xs: 12, sm: 13 } }}>Acciones</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {getUnenrolledStudents().length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={3} align="center">
-                    <Typography sx={{ py: 4, color: '#AAA' }}>
+                    <Typography sx={{ py: { xs: 3, sm: 4 }, color: '#AAA', fontSize: { xs: 12, sm: 13 } }}>
                       Todos los estudiantes están matriculados
                     </Typography>
                   </TableCell>
@@ -492,8 +599,12 @@ const AdminEnrollments = () => {
               ) : (
                 getUnenrolledStudents().map((student) => (
                   <TableRow key={student.id} hover>
-                    <TableCell>{`${student.first_name} ${student.last_name}`.trim() || student.username}</TableCell>
-                    <TableCell>{student.email}</TableCell>
+                    <TableCell sx={{ fontSize: { xs: 12, sm: 13 }, wordBreak: 'break-word' }}>
+                      {`${student.first_name} ${student.last_name}`.trim() || student.username}
+                    </TableCell>
+                    <TableCell sx={{ fontSize: { xs: 11, sm: 12 } }}>
+                      {student.email}
+                    </TableCell>
                     <TableCell>
                       <Button
                         size="small"
@@ -507,6 +618,10 @@ const AdminEnrollments = () => {
                           })
                           setOpenDialog(true)
                         }}
+                        sx={{ 
+                          fontSize: { xs: 11, sm: 12 },
+                          px: { xs: 1, sm: 1.5 }
+                        }}
                       >
                         Matricular
                       </Button>
@@ -519,29 +634,47 @@ const AdminEnrollments = () => {
         </TableContainer>
       )}
 
-      {/* Dialog para matrícula individual */}
-      <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
-        <DialogTitle>
+      {/* Dialog para matrícula individual - Responsive */}
+      <Dialog 
+        open={openDialog} 
+        onClose={handleCloseDialog} 
+        maxWidth="sm" 
+        fullWidth
+        fullScreen={isMobile}
+        PaperProps={{
+          sx: {
+            borderRadius: { xs: 0, sm: '12px' },
+            m: { xs: 0, sm: 2 }
+          }
+        }}
+      >
+        <DialogTitle sx={{ 
+          fontFamily: '"Instrument Serif", serif', 
+          fontSize: { xs: 20, sm: 24 },
+          px: { xs: 2, sm: 3 },
+          pt: { xs: 2, sm: 2.5 }
+        }}>
           {editingEnrollment ? 'Editar Matrícula' : 'Nueva Matrícula'}
         </DialogTitle>
-        <DialogContent>
+        <DialogContent sx={{ px: { xs: 2, sm: 3 } }}>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
             {error && (
-              <Alert severity="error" onClose={() => setError('')}>
+              <Alert severity="error" onClose={() => setError('')} sx={{ borderRadius: '10px', fontSize: { xs: 12, sm: 13 } }}>
                 {error}
               </Alert>
             )}
             
             <FormControl fullWidth size="small" required>
-              <InputLabel>Estudiante</InputLabel>
+              <InputLabel sx={{ fontSize: { xs: 12, sm: 13 } }}>Estudiante</InputLabel>
               <Select
                 name="student"
                 value={formData.student}
                 onChange={(e) => setFormData({ ...formData, student: e.target.value })}
                 label="Estudiante"
+                sx={{ fontSize: { xs: 12, sm: 13 } }}
               >
                 {students.map((student) => (
-                  <MenuItem key={student.id} value={student.id}>
+                  <MenuItem key={student.id} value={student.id} sx={{ fontSize: { xs: 12, sm: 13 } }}>
                     {`${student.first_name} ${student.last_name}`.trim() || student.username}
                   </MenuItem>
                 ))}
@@ -549,15 +682,16 @@ const AdminEnrollments = () => {
             </FormControl>
 
             <FormControl fullWidth size="small" required>
-              <InputLabel>Grado</InputLabel>
+              <InputLabel sx={{ fontSize: { xs: 12, sm: 13 } }}>Grado</InputLabel>
               <Select
                 name="grade"
                 value={formData.grade}
                 onChange={(e) => setFormData({ ...formData, grade: e.target.value })}
                 label="Grado"
+                sx={{ fontSize: { xs: 12, sm: 13 } }}
               >
                 {grades.map((grade) => (
-                  <MenuItem key={grade.id} value={grade.id}>
+                  <MenuItem key={grade.id} value={grade.id} sx={{ fontSize: { xs: 12, sm: 13 } }}>
                     {grade.name}
                   </MenuItem>
                 ))}
@@ -565,15 +699,16 @@ const AdminEnrollments = () => {
             </FormControl>
 
             <FormControl fullWidth size="small" required>
-              <InputLabel>Año Escolar</InputLabel>
+              <InputLabel sx={{ fontSize: { xs: 12, sm: 13 } }}>Año Escolar</InputLabel>
               <Select
                 name="school_year"
                 value={formData.school_year}
                 onChange={(e) => setFormData({ ...formData, school_year: e.target.value })}
                 label="Año Escolar"
+                sx={{ fontSize: { xs: 12, sm: 13 } }}
               >
                 {schoolYears.map((year) => (
-                  <MenuItem key={year.id} value={year.id}>
+                  <MenuItem key={year.id} value={year.id} sx={{ fontSize: { xs: 12, sm: 13 } }}>
                     {year.name} {year.is_active ? '(Activo)' : ''}
                   </MenuItem>
                 ))}
@@ -581,14 +716,18 @@ const AdminEnrollments = () => {
             </FormControl>
           </Box>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDialog}>Cancelar</Button>
+        <DialogActions sx={{ p: { xs: 2, sm: 2.5 }, pt: 0 }}>
+          <Button onClick={handleCloseDialog} sx={{ fontSize: { xs: 12, sm: 13 } }}>
+            Cancelar
+          </Button>
           <Button
             onClick={handleSubmit}
             variant="contained"
             sx={{
               background: 'linear-gradient(135deg, #1A1A2E 0%, #2D2B55 100%)',
-              '&:hover': { opacity: 0.9 }
+              '&:hover': { opacity: 0.9 },
+              fontSize: { xs: 12, sm: 13 },
+              px: { xs: 2, sm: 3 }
             }}
           >
             {editingEnrollment ? 'Actualizar' : 'Matricular'}
@@ -596,38 +735,59 @@ const AdminEnrollments = () => {
         </DialogActions>
       </Dialog>
 
-      {/* Dialog para matrícula masiva */}
-      <Dialog open={openMassiveDialog} onClose={() => setOpenMassiveDialog(false)} maxWidth="md" fullWidth>
-        <DialogTitle>Matrícula Masiva de Estudiantes</DialogTitle>
-        <DialogContent>
+      {/* Dialog para matrícula masiva - Responsive */}
+      <Dialog 
+        open={openMassiveDialog} 
+        onClose={() => setOpenMassiveDialog(false)} 
+        maxWidth="md" 
+        fullWidth
+        fullScreen={isMobile}
+        PaperProps={{
+          sx: {
+            borderRadius: { xs: 0, sm: '12px' },
+            m: { xs: 0, sm: 2 }
+          }
+        }}
+      >
+        <DialogTitle sx={{ 
+          fontFamily: '"Instrument Serif", serif', 
+          fontSize: { xs: 20, sm: 24 },
+          px: { xs: 2, sm: 3 },
+          pt: { xs: 2, sm: 2.5 }
+        }}>
+          Matrícula Masiva de Estudiantes
+        </DialogTitle>
+        <DialogContent sx={{ px: { xs: 2, sm: 3 } }}>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, mt: 1 }}>
             <Grid container spacing={2}>
-              <Grid item xs={12} md={6}>
+              <Grid item xs={12} sm={6}>
                 <FormControl fullWidth size="small" required>
-                  <InputLabel>Grado</InputLabel>
+                  <InputLabel sx={{ fontSize: { xs: 12, sm: 13 } }}>Grado</InputLabel>
                   <Select
                     value={massiveForm.grade}
                     onChange={(e) => setMassiveForm({ ...massiveForm, grade: e.target.value })}
                     label="Grado"
+                    sx={{ fontSize: { xs: 12, sm: 13 } }}
                   >
                     {grades.map((grade) => (
-                      <MenuItem key={grade.id} value={grade.id}>
+                      <MenuItem key={grade.id} value={grade.id} sx={{ fontSize: { xs: 12, sm: 13 } }}>
                         {grade.name}
                       </MenuItem>
                     ))}
                   </Select>
                 </FormControl>
               </Grid>
-              <Grid item xs={12} md={6}>
+              <Grid item xs={12} sm={6}>
                 <FormControl fullWidth size="small" required>
-                  <InputLabel>Año Escolar</InputLabel>
+                  <InputLabel sx={{ fontSize: { xs: 12, sm: 13 } }}>Año Escolar</InputLabel>
                   <Select
                     value={massiveForm.school_year}
                     onChange={(e) => setMassiveForm({ ...massiveForm, school_year: e.target.value })}
                     label="Año Escolar"
+                    sx={{ fontSize: { xs: 12, sm: 13 } }}
                   >
                     {schoolYears.map((year) => (
-                      <MenuItem key={year.id} value={year.id}>
+                      <MenuItem key={year.id} value={year.id} sx={{ fontSize: { xs: 12, sm: 13 } }}>
                         {year.name}
                       </MenuItem>
                     ))}
@@ -644,20 +804,42 @@ const AdminEnrollments = () => {
                   <Checkbox
                     checked={massiveForm.enroll_all}
                     onChange={(e) => setMassiveForm({ ...massiveForm, enroll_all: e.target.checked })}
+                    sx={{ '& .MuiSvgIcon-root': { fontSize: { xs: 18, sm: 20 } } }}
                   />
                 }
-                label="Matricular todos los estudiantes"
+                label={
+                  <Typography sx={{ fontSize: { xs: 12, sm: 13 } }}>
+                    Matricular todos los estudiantes
+                  </Typography>
+                }
               />
               
               {!massiveForm.enroll_all && (
                 <>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                    <Typography variant="subtitle2">Seleccionar estudiantes:</Typography>
-                    <Button size="small" onClick={handleSelectAll}>
+                  <Box sx={{ 
+                    display: 'flex', 
+                    flexDirection: { xs: 'column', sm: 'row' },
+                    justifyContent: 'space-between', 
+                    alignItems: { xs: 'flex-start', sm: 'center' }, 
+                    mb: 2,
+                    gap: 1
+                  }}>
+                    <Typography variant="subtitle2" sx={{ fontSize: { xs: 12, sm: 13 } }}>
+                      Seleccionar estudiantes:
+                    </Typography>
+                    <Button 
+                      size="small" 
+                      onClick={handleSelectAll}
+                      sx={{ fontSize: { xs: 11, sm: 12 } }}
+                    >
                       {selectedStudents.length === students.length ? 'Deseleccionar todos' : 'Seleccionar todos'}
                     </Button>
                   </Box>
-                  <Paper sx={{ maxHeight: 300, overflow: 'auto', p: 1 }}>
+                  <Paper sx={{ 
+                    maxHeight: 300, 
+                    overflow: 'auto', 
+                    p: 1 
+                  }}>
                     {students.map((student) => (
                       <FormControlLabel
                         key={student.id}
@@ -665,10 +847,15 @@ const AdminEnrollments = () => {
                           <Checkbox
                             checked={selectedStudents.includes(student.id)}
                             onChange={() => handleToggleStudent(student.id)}
+                            sx={{ '& .MuiSvgIcon-root': { fontSize: { xs: 16, sm: 18 } } }}
                           />
                         }
-                        label={`${student.first_name} ${student.last_name}`.trim() || student.username}
-                        sx={{ display: 'block', ml: 1 }}
+                        label={
+                          <Typography sx={{ fontSize: { xs: 12, sm: 13 } }}>
+                            {`${student.first_name} ${student.last_name}`.trim() || student.username}
+                          </Typography>
+                        }
+                        sx={{ display: 'block', ml: 1, mb: 0.5 }}
                       />
                     ))}
                   </Paper>
@@ -677,14 +864,18 @@ const AdminEnrollments = () => {
             </Box>
           </Box>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenMassiveDialog(false)}>Cancelar</Button>
+        <DialogActions sx={{ p: { xs: 2, sm: 2.5 }, pt: 0 }}>
+          <Button onClick={() => setOpenMassiveDialog(false)} sx={{ fontSize: { xs: 12, sm: 13 } }}>
+            Cancelar
+          </Button>
           <Button
             onClick={handleMassiveSubmit}
             variant="contained"
             sx={{
               background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
-              '&:hover': { opacity: 0.9 }
+              '&:hover': { opacity: 0.9 },
+              fontSize: { xs: 12, sm: 13 },
+              px: { xs: 2, sm: 3 }
             }}
           >
             Matricular Seleccionados
@@ -698,7 +889,7 @@ const AdminEnrollments = () => {
         onClose={() => setSuccess('')}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
-        <Alert severity="success" onClose={() => setSuccess('')}>
+        <Alert severity="success" onClose={() => setSuccess('')} sx={{ borderRadius: '10px', fontSize: { xs: 12, sm: 13 } }}>
           {success}
         </Alert>
       </Snackbar>
