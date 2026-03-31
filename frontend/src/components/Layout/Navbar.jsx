@@ -56,6 +56,30 @@ const Navbar = ({ onMenuClick }) => {
     }
   }
 
+  const getFullName = () => {
+    if (user?.first_name && user?.last_name) {
+      return `${user.first_name} ${user.last_name}`
+    }
+    if (user?.first_name) {
+      return user.first_name
+    }
+    return user?.username || 'Usuario'
+  }
+
+  const getShortName = () => {
+    if (user?.first_name && user?.last_name) {
+      // Mostrar solo nombre y primera letra del apellido
+      return `${user.first_name} ${user.last_name.charAt(0)}.`
+    }
+    if (user?.first_name) {
+      return user.first_name
+    }
+    if (user?.username && user.username.length > 10) {
+      return user.username.substring(0, 10) + '...'
+    }
+    return user?.username || 'Usuario'
+  }
+
   const getInitials = () => {
     if (user?.first_name && user?.last_name) {
       return `${user.first_name[0]}${user.last_name[0]}`.toUpperCase()
@@ -145,7 +169,7 @@ const Navbar = ({ onMenuClick }) => {
           alignItems: 'center', 
           gap: { xs: 1, sm: 2 }
         }}>
-          {/* Notificaciones - ocultar en móvil muy pequeño */}
+          {/* Notificaciones - ocultar en móvil */}
           {!isMobile && (
             <Tooltip title="Notificaciones">
               <IconButton color="inherit" onClick={handleNotifications}>
@@ -156,7 +180,7 @@ const Navbar = ({ onMenuClick }) => {
             </Tooltip>
           )}
           
-          {/* Dashboard - ocultar en móvil muy pequeño */}
+          {/* Dashboard - ocultar en móvil */}
           {!isMobile && (
             <Tooltip title="Dashboard">
               <IconButton color="inherit" onClick={() => navigate(getDashboardPath())}>
@@ -170,29 +194,71 @@ const Navbar = ({ onMenuClick }) => {
             alignItems: 'center', 
             gap: { xs: 1, sm: 2 }
           }}>
-            {/* Chip de rol - ocultar texto en móvil muy pequeño */}
-            {!isMobile ? (
-              <Chip
-                label={getRoleName()}
-                color={getRoleColor()}
-                size="small"
-                sx={{ 
-                  fontWeight: 'bold',
-                  fontSize: { xs: 11, sm: 12 }
-                }}
-              />
-            ) : (
-              <Chip
-                label={getRoleName().charAt(0)}
-                color={getRoleColor()}
-                size="small"
-                sx={{ 
-                  fontWeight: 'bold',
-                  minWidth: 32,
-                  '& .MuiChip-label': { px: 1 }
-                }}
-              />
-            )}
+            {/* Nombre del usuario - responsivo */}
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              {/* En móvil: mostrar nombre corto */}
+              {isMobile ? (
+                <Typography 
+                  variant="body2" 
+                  sx={{ 
+                    color: 'white',
+                    fontWeight: 500,
+                    fontSize: 12,
+                    maxWidth: 120,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap'
+                  }}
+                >
+                  {getShortName()}
+                </Typography>
+              ) : isTablet ? (
+                /* En tablet: mostrar nombre completo si cabe */
+                <Typography 
+                  variant="body2" 
+                  sx={{ 
+                    color: 'white',
+                    fontWeight: 500,
+                    fontSize: 13,
+                    mr: 1,
+                    maxWidth: 150,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap'
+                  }}
+                >
+                  {getFullName()}
+                </Typography>
+              ) : (
+                /* En desktop: mostrar nombre completo sin límite */
+                <Typography 
+                  variant="body2" 
+                  sx={{ 
+                    color: 'white',
+                    fontWeight: 500,
+                    fontSize: 14,
+                    mr: 1
+                  }}
+                >
+                  {getFullName()}
+                </Typography>
+              )}
+            </Box>
+            
+            {/* Chip de rol */}
+            <Chip
+              label={getRoleName()}
+              color={getRoleColor()}
+              size="small"
+              sx={{ 
+                fontWeight: 'bold',
+                fontSize: { xs: 10, sm: 11, md: 12 },
+                height: { xs: 24, sm: 28 },
+                '& .MuiChip-label': { 
+                  px: { xs: 1, sm: 1.5 }
+                }
+              }}
+            />
             
             <Tooltip title="Perfil">
               <IconButton onClick={handleMenu} size="small">
