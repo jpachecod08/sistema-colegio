@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { 
   Drawer, List, ListItem, ListItemIcon, ListItemText, Box, 
   Toolbar, Divider, Typography, Collapse, IconButton, 
@@ -25,7 +25,7 @@ import { useAuth } from '../../context/AuthContext'
 const drawerWidth = 280
 const miniDrawerWidth = 72
 
-const Sidebar = () => {
+const Sidebar = ({ mobileOpen, onMobileClose, isCollapsed, onCollapse }) => {
   const navigate = useNavigate()
   const location = useLocation()
   const { user } = useAuth()
@@ -33,17 +33,23 @@ const Sidebar = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
   const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'))
   
-  const [mobileOpen, setMobileOpen] = useState(false)
-  const [isCollapsed, setIsCollapsed] = useState(false)
-  
   // Estado para secciones colapsables
   const [openSections, setOpenSections] = useState({
     principal: true,
     gestion: true,
     academicos: true,
     reportes: true,
-    sistema: true
+    sistema: true,
+    consultas: true,
+    seguimiento: true
   })
+
+  // Cerrar el drawer móvil al cambiar de ruta
+  useEffect(() => {
+    if (isMobile && mobileOpen) {
+      onMobileClose?.()
+    }
+  }, [location.pathname, isMobile])
 
   const handleSectionClick = (section) => {
     setOpenSections(prev => ({
@@ -52,12 +58,11 @@ const Sidebar = () => {
     }))
   }
 
-  const handleDrawerToggle = () => {
-    setMobileOpen(!mobileOpen)
-  }
-
-  const handleDrawerCollapse = () => {
-    setIsCollapsed(!isCollapsed)
+  const handleNavigate = (path) => {
+    navigate(path)
+    if (isMobile) {
+      onMobileClose?.()
+    }
   }
 
   const getMenuItems = () => {
@@ -77,10 +82,10 @@ const Sidebar = () => {
             title: 'GESTIÓN',
             icon: <PeopleIcon />,
             items: [
-              { text: 'Usuarios', icon: <PeopleIcon />, path: '/admin/users', desc: 'Gestionar usuarios del sistema' },
-              { text: 'Clases', icon: <ClassIcon />, path: '/admin/classes', desc: 'Administrar grados y niveles' },
+              { text: 'Usuarios', icon: <PeopleIcon />, path: '/admin/users', desc: 'Gestionar usuarios' },
+              { text: 'Clases', icon: <ClassIcon />, path: '/admin/classes', desc: 'Administrar grados' },
               { text: 'Materias', icon: <SchoolIcon />, path: '/admin/subjects', desc: 'Gestionar asignaturas' },
-              { text: 'Asignaciones', icon: <AssignmentIcon />, path: '/admin/assignments', desc: 'Asignar profesores a clases' },
+              { text: 'Asignaciones', icon: <AssignmentIcon />, path: '/admin/assignments', desc: 'Asignar profesores' },
               { text: 'Matrículas', icon: <SchoolIcon />, path: '/admin/enrollments', desc: 'Matricular estudiantes' },
             ]
           },
@@ -89,7 +94,7 @@ const Sidebar = () => {
             title: 'ACADÉMICO',
             icon: <GradeIcon />,
             items: [
-              { text: 'Calificaciones', icon: <GradeIcon />, path: '/admin/grades', desc: 'Ver todas las calificaciones' },
+              { text: 'Calificaciones', icon: <GradeIcon />, path: '/admin/grades', desc: 'Ver calificaciones' },
               { text: 'Asistencia', icon: <EventNoteIcon />, path: '/admin/attendance', desc: 'Reporte de asistencia' },
               { text: 'Boletines', icon: <AssessmentIcon />, path: '/admin/report-card', desc: 'Generar boletines' },
             ]
@@ -99,7 +104,7 @@ const Sidebar = () => {
             title: 'REPORTES',
             icon: <DescriptionIcon />,
             items: [
-              { text: 'Reportes', icon: <DescriptionIcon />, path: '/admin/reports', desc: 'Generar reportes PDF' },
+              { text: 'Reportes', icon: <DescriptionIcon />, path: '/admin/reports', desc: 'Generar PDF' },
               { text: 'Estadísticas', icon: <BarChartIcon />, path: '/admin/statistics', desc: 'Análisis de datos' },
             ]
           },
@@ -129,7 +134,7 @@ const Sidebar = () => {
             title: 'GESTIÓN ACADÉMICA',
             icon: <GradeIcon />,
             items: [
-              { text: 'Calificaciones', icon: <GradeIcon />, path: '/teacher/grades', desc: 'Gestionar calificaciones' },
+              { text: 'Calificaciones', icon: <GradeIcon />, path: '/teacher/grades', desc: 'Gestionar notas' },
               { text: 'Asistencia', icon: <EventNoteIcon />, path: '/teacher/attendance', desc: 'Tomar asistencia' },
               { text: 'Boletines', icon: <AssessmentIcon />, path: '/teacher/report-card', desc: 'Generar boletines' },
             ]
@@ -152,7 +157,7 @@ const Sidebar = () => {
             title: 'MIS DATOS',
             icon: <GradeIcon />,
             items: [
-              { text: 'Mis Notas', icon: <GradeIcon />, path: '/student/grades', desc: 'Consultar calificaciones' },
+              { text: 'Mis Notas', icon: <GradeIcon />, path: '/student/grades', desc: 'Consultar notas' },
               { text: 'Mi Asistencia', icon: <EventNoteIcon />, path: '/student/attendance', desc: 'Ver asistencia' },
               { text: 'Mi Boletín', icon: <AssessmentIcon />, path: '/student/report-card', desc: 'Descargar boletín' },
             ]
@@ -175,7 +180,7 @@ const Sidebar = () => {
             title: 'SEGUIMIENTO',
             icon: <PeopleIcon />,
             items: [
-              { text: 'Notas de mis hijos', icon: <GradeIcon />, path: '/parent/grades', desc: 'Ver calificaciones' },
+              { text: 'Notas', icon: <GradeIcon />, path: '/parent/grades', desc: 'Ver calificaciones' },
               { text: 'Asistencia', icon: <EventNoteIcon />, path: '/parent/attendance', desc: 'Ver asistencia' },
               { text: 'Boletín', icon: <AssessmentIcon />, path: '/parent/report-card', desc: 'Descargar boletín' },
             ]
@@ -187,17 +192,15 @@ const Sidebar = () => {
   }
 
   const menuData = getMenuItems()
-
-  // Determinar el ancho del drawer basado en el estado
-  const currentDrawerWidth = isCollapsed && !isMobile && !isTablet ? miniDrawerWidth : drawerWidth
+  const isCollapsedMode = isCollapsed && !isMobile && !isTablet
+  const currentWidth = isCollapsedMode ? miniDrawerWidth : drawerWidth
 
   const renderSection = (section) => {
     if (!section.items || section.items.length === 0) return null
     
     const isOpen = openSections[section.id] !== false
-    const isCollapsedMode = isCollapsed && !isMobile && !isTablet
     
-    // Si está colapsado, solo mostrar el icono en la cabecera
+    // Modo colapsado (solo íconos)
     if (isCollapsedMode) {
       return (
         <Box sx={{ mb: 1 }}>
@@ -205,7 +208,7 @@ const Sidebar = () => {
             onClick={() => handleSectionClick(section.id)}
             sx={{
               px: 1,
-              py: 1,
+              py: 1.5,
               justifyContent: 'center',
               cursor: 'pointer',
               '&:hover': {
@@ -224,7 +227,7 @@ const Sidebar = () => {
     
     return (
       <Box sx={{ mb: 1 }}>
-        {/* Cabecera de sección con flecha */}
+        {/* Cabecera de sección */}
         <ListItem
           onClick={() => handleSectionClick(section.id)}
           sx={{
@@ -257,10 +260,7 @@ const Sidebar = () => {
             {section.items.map((item) => (
               <ListItem
                 key={item.text}
-                onClick={() => {
-                  navigate(item.path)
-                  if (isMobile) setMobileOpen(false)
-                }}
+                onClick={() => handleNavigate(item.path)}
                 selected={location.pathname === item.path || location.pathname.startsWith(item.path + '/')}
                 sx={{ 
                   cursor: 'pointer',
@@ -319,8 +319,8 @@ const Sidebar = () => {
       display: 'flex',
       flexDirection: 'column'
     }}>
-      {/* Header con botón de colapso (solo para desktop) */}
-      {!isMobile && (
+      {/* Botón de colapso (solo para desktop) */}
+      {!isMobile && !isTablet && (
         <Box sx={{ 
           display: 'flex', 
           justifyContent: 'flex-end', 
@@ -329,7 +329,7 @@ const Sidebar = () => {
           borderBottom: '1px solid #F0EDE8',
           pb: 1
         }}>
-          <IconButton onClick={handleDrawerCollapse} size="small">
+          <IconButton onClick={onCollapse} size="small">
             {isCollapsed ? <MenuIcon /> : <ChevronLeftIcon />}
           </IconButton>
         </Box>
@@ -339,69 +339,48 @@ const Sidebar = () => {
       {menuData.sections.map((section, index) => (
         <React.Fragment key={section.id}>
           {renderSection(section)}
-          {index < menuData.sections.length - 1 && !(isCollapsed && !isMobile && !isTablet) && <Divider sx={{ my: 1, mx: 2 }} />}
+          {index < menuData.sections.length - 1 && !isCollapsedMode && <Divider sx={{ my: 1, mx: 2 }} />}
         </React.Fragment>
       ))}
     </Box>
   )
 
-  // En móvil, usar SwipeableDrawer temporal
+  // En móvil: Drawer temporal con botón hamburguesa
   if (isMobile) {
     return (
-      <>
-        {/* Botón de menú para móvil */}
-        <IconButton
-          color="inherit"
-          aria-label="open drawer"
-          edge="start"
-          onClick={handleDrawerToggle}
-          sx={{
-            position: 'fixed',
-            top: 12,
-            left: 12,
-            zIndex: 1100,
-            backgroundColor: '#fff',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-            '&:hover': { backgroundColor: '#f5f5f5' }
-          }}
-        >
-          <MenuIcon />
-        </IconButton>
-        
-        <SwipeableDrawer
-          anchor="left"
-          open={mobileOpen}
-          onClose={handleDrawerToggle}
-          onOpen={() => {}}
-          sx={{
-            '& .MuiDrawer-paper': {
-              width: drawerWidth,
-              boxSizing: 'border-box',
-              border: 'none',
-              background: '#fff',
-            },
-          }}
-        >
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end', p: 1 }}>
-            <IconButton onClick={handleDrawerToggle}>
-              <ChevronLeftIcon />
-            </IconButton>
-          </Box>
-          {drawerContent}
-        </SwipeableDrawer>
-      </>
+      <SwipeableDrawer
+        anchor="left"
+        open={mobileOpen}
+        onClose={onMobileClose}
+        onOpen={() => {}}
+        sx={{
+          '& .MuiDrawer-paper': {
+            width: drawerWidth,
+            boxSizing: 'border-box',
+            border: 'none',
+            background: '#fff',
+          },
+        }}
+      >
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', p: 1 }}>
+          <IconButton onClick={onMobileClose}>
+            <ChevronLeftIcon />
+          </IconButton>
+        </Box>
+        {drawerContent}
+      </SwipeableDrawer>
     )
   }
 
-  // En tablet y desktop, usar Drawer permanente con opción de colapso
+  // En tablet y desktop: Drawer permanente
   return (
     <Drawer
       variant="permanent"
       sx={{
-        width: currentDrawerWidth,
+        width: currentWidth,
         flexShrink: 0,
         [`& .MuiDrawer-paper`]: { 
-          width: currentDrawerWidth, 
+          width: currentWidth, 
           boxSizing: 'border-box',
           border: 'none',
           background: '#fff',
@@ -411,6 +390,8 @@ const Sidebar = () => {
             duration: theme.transitions.duration.enteringScreen,
           }),
           overflowX: 'hidden',
+          position: 'relative',
+          height: '100%',
         },
       }}
     >
