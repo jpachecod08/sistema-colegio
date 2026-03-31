@@ -56,35 +56,42 @@ const Navbar = ({ onMenuClick }) => {
     }
   }
 
-  const getFullName = () => {
+  // Obtener el nombre a mostrar (prioriza nombre real, luego username)
+  const getDisplayName = () => {
     if (user?.first_name && user?.last_name) {
       return `${user.first_name} ${user.last_name}`
     }
     if (user?.first_name) {
       return user.first_name
     }
+    // Si no tiene nombre real, mostrar el username pero NO mostrar el chip de rol separado
     return user?.username || 'Usuario'
   }
 
-  const getShortName = () => {
-    if (user?.first_name && user?.last_name) {
-      // Mostrar solo nombre y primera letra del apellido
-      return `${user.first_name} ${user.last_name.charAt(0)}.`
+  const getShortDisplayName = () => {
+    const fullName = getDisplayName()
+    if (fullName.length > 15) {
+      return fullName.substring(0, 12) + '...'
     }
-    if (user?.first_name) {
-      return user.first_name
-    }
-    if (user?.username && user.username.length > 10) {
-      return user.username.substring(0, 10) + '...'
-    }
-    return user?.username || 'Usuario'
+    return fullName
   }
 
   const getInitials = () => {
     if (user?.first_name && user?.last_name) {
       return `${user.first_name[0]}${user.last_name[0]}`.toUpperCase()
     }
+    if (user?.first_name) {
+      return user.first_name[0].toUpperCase()
+    }
     return user?.username?.[0]?.toUpperCase() || 'U'
+  }
+
+  // Determinar si debe mostrar el chip de rol
+  // Solo mostrar el chip si el usuario tiene nombre real (para no duplicar información)
+  const shouldShowRoleChip = () => {
+    // Si el usuario tiene nombre y apellido, mostramos el chip
+    // Si solo tiene username, NO mostramos el chip porque ya se ve en el nombre
+    return user?.first_name && user?.last_name
   }
 
   const handleMenu = (event) => {
@@ -196,69 +203,38 @@ const Navbar = ({ onMenuClick }) => {
           }}>
             {/* Nombre del usuario - responsivo */}
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              {/* En móvil: mostrar nombre corto */}
-              {isMobile ? (
-                <Typography 
-                  variant="body2" 
-                  sx={{ 
-                    color: 'white',
-                    fontWeight: 500,
-                    fontSize: 12,
-                    maxWidth: 120,
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap'
-                  }}
-                >
-                  {getShortName()}
-                </Typography>
-              ) : isTablet ? (
-                /* En tablet: mostrar nombre completo si cabe */
-                <Typography 
-                  variant="body2" 
-                  sx={{ 
-                    color: 'white',
-                    fontWeight: 500,
-                    fontSize: 13,
-                    mr: 1,
-                    maxWidth: 150,
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap'
-                  }}
-                >
-                  {getFullName()}
-                </Typography>
-              ) : (
-                /* En desktop: mostrar nombre completo sin límite */
-                <Typography 
-                  variant="body2" 
-                  sx={{ 
-                    color: 'white',
-                    fontWeight: 500,
-                    fontSize: 14,
-                    mr: 1
-                  }}
-                >
-                  {getFullName()}
-                </Typography>
-              )}
+              <Typography 
+                variant="body2" 
+                sx={{ 
+                  color: 'white',
+                  fontWeight: 500,
+                  fontSize: { xs: 12, sm: 13, md: 14 },
+                  maxWidth: { xs: 120, sm: 150, md: 200 },
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                {isMobile ? getShortDisplayName() : getDisplayName()}
+              </Typography>
             </Box>
             
-            {/* Chip de rol */}
-            <Chip
-              label={getRoleName()}
-              color={getRoleColor()}
-              size="small"
-              sx={{ 
-                fontWeight: 'bold',
-                fontSize: { xs: 10, sm: 11, md: 12 },
-                height: { xs: 24, sm: 28 },
-                '& .MuiChip-label': { 
-                  px: { xs: 1, sm: 1.5 }
-                }
-              }}
-            />
+            {/* Chip de rol - solo mostrar si el usuario tiene nombre real */}
+            {shouldShowRoleChip() && (
+              <Chip
+                label={getRoleName()}
+                color={getRoleColor()}
+                size="small"
+                sx={{ 
+                  fontWeight: 'bold',
+                  fontSize: { xs: 10, sm: 11, md: 12 },
+                  height: { xs: 24, sm: 28 },
+                  '& .MuiChip-label': { 
+                    px: { xs: 1, sm: 1.5 }
+                  }
+                }}
+              />
+            )}
             
             <Tooltip title="Perfil">
               <IconButton onClick={handleMenu} size="small">
