@@ -30,7 +30,9 @@ import {
   FormControl,
   InputLabel,
   Select,
-  MenuItem
+  MenuItem,
+  useMediaQuery,
+  useTheme
 } from '@mui/material'
 import { 
   ArrowBack, 
@@ -61,8 +63,11 @@ const extractDataFromResponse = (response) => {
   return []
 }
 
-// Componente para gestionar años escolares
+// Componente para gestionar años escolares - Responsive
 const SchoolYearsManager = ({ schoolYears, fetchSchoolYears, showMessage }) => {
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
+  
   const [openDialog, setOpenDialog] = useState(false)
   const [editingYear, setEditingYear] = useState(null)
   const [formData, setFormData] = useState({
@@ -158,9 +163,21 @@ const SchoolYearsManager = ({ schoolYears, fetchSchoolYears, showMessage }) => {
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-        <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <School sx={{ fontSize: 20 }} />
+      <Box sx={{ 
+        display: 'flex', 
+        flexDirection: { xs: 'column', sm: 'row' },
+        justifyContent: 'space-between', 
+        alignItems: { xs: 'flex-start', sm: 'center' }, 
+        gap: { xs: 2, sm: 0 },
+        mb: 2 
+      }}>
+        <Typography variant="h6" sx={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: 1,
+          fontSize: { xs: 16, sm: 18, md: 20 }
+        }}>
+          <School sx={{ fontSize: { xs: 18, sm: 20 } }} />
           Años Escolares
         </Typography>
         <Button
@@ -168,27 +185,40 @@ const SchoolYearsManager = ({ schoolYears, fetchSchoolYears, showMessage }) => {
           startIcon={<Add />}
           onClick={() => handleOpenDialog()}
           size="small"
+          sx={{ 
+            fontSize: { xs: 11, sm: 12 },
+            px: { xs: 1.5, sm: 2 }
+          }}
         >
           Nuevo Año Escolar
         </Button>
       </Box>
 
-      <TableContainer component={Paper} sx={{ borderRadius: '12px', mb: 3 }}>
-        <Table size="small">
+      <TableContainer 
+        component={Paper} 
+        sx={{ 
+          borderRadius: '12px', 
+          mb: 3,
+          overflowX: 'auto'
+        }}
+      >
+        <Table size="small" sx={{ minWidth: isMobile ? 500 : 'auto' }}>
           <TableHead>
             <TableRow sx={{ background: '#F5F3EE' }}>
-              <TableCell sx={{ fontWeight: 600 }}>Nombre</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>Fecha Inicio</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>Fecha Fin</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>Estado</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>Acciones</TableCell>
+              <TableCell sx={{ fontWeight: 600, fontSize: { xs: 12, sm: 13 } }}>Nombre</TableCell>
+              <TableCell sx={{ fontWeight: 600, fontSize: { xs: 12, sm: 13 } }}>Fecha Inicio</TableCell>
+              {!isMobile && (
+                <TableCell sx={{ fontWeight: 600, fontSize: { xs: 12, sm: 13 } }}>Fecha Fin</TableCell>
+              )}
+              <TableCell sx={{ fontWeight: 600, fontSize: { xs: 12, sm: 13 } }}>Estado</TableCell>
+              <TableCell sx={{ fontWeight: 600, fontSize: { xs: 12, sm: 13 } }}>Acciones</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {schoolYears.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} align="center">
-                  <Typography sx={{ color: '#AAA', py: 2 }}>
+                <TableCell colSpan={isMobile ? 4 : 5} align="center">
+                  <Typography sx={{ color: '#AAA', py: 2, fontSize: { xs: 12, sm: 13 } }}>
                     No hay años escolares registrados
                   </Typography>
                 </TableCell>
@@ -197,17 +227,30 @@ const SchoolYearsManager = ({ schoolYears, fetchSchoolYears, showMessage }) => {
               schoolYears.map((year) => (
                 <TableRow key={year.id}>
                   <TableCell>
-                    <Typography sx={{ fontWeight: 500 }}>{year.name}</Typography>
+                    <Typography sx={{ 
+                      fontWeight: 500, 
+                      fontSize: { xs: 12, sm: 13 },
+                      wordBreak: 'break-word'
+                    }}>
+                      {year.name}
+                    </Typography>
                   </TableCell>
-                  <TableCell>{year.start_date}</TableCell>
-                  <TableCell>{year.end_date}</TableCell>
+                  <TableCell sx={{ fontSize: { xs: 12, sm: 13 } }}>
+                    {year.start_date}
+                  </TableCell>
+                  {!isMobile && (
+                    <TableCell sx={{ fontSize: { xs: 12, sm: 13 } }}>
+                      {year.end_date}
+                    </TableCell>
+                  )}
                   <TableCell>
                     <Chip
                       label={year.is_active ? 'Activo' : 'Inactivo'}
                       sx={{
                         backgroundColor: year.is_active ? '#10B98120' : '#EF444420',
                         color: year.is_active ? '#10B981' : '#EF4444',
-                        fontSize: 11
+                        fontSize: { xs: 10, sm: 11 },
+                        height: { xs: 24, sm: 32 }
                       }}
                     />
                   </TableCell>
@@ -215,7 +258,7 @@ const SchoolYearsManager = ({ schoolYears, fetchSchoolYears, showMessage }) => {
                     <IconButton 
                       size="small" 
                       onClick={() => handleOpenDialog(year)}
-                      sx={{ color: '#6C63FF' }}
+                      sx={{ color: '#6C63FF', p: { xs: 0.5, sm: 0.75 } }}
                     >
                       <Edit fontSize="small" />
                     </IconButton>
@@ -223,7 +266,7 @@ const SchoolYearsManager = ({ schoolYears, fetchSchoolYears, showMessage }) => {
                       <IconButton 
                         size="small" 
                         onClick={() => handleSetActive(year.id)}
-                        sx={{ color: '#10B981' }}
+                        sx={{ color: '#10B981', p: { xs: 0.5, sm: 0.75 } }}
                         title="Activar año escolar"
                       >
                         <CheckCircle fontSize="small" />
@@ -232,7 +275,7 @@ const SchoolYearsManager = ({ schoolYears, fetchSchoolYears, showMessage }) => {
                     <IconButton 
                       size="small" 
                       onClick={() => handleDeleteYear(year.id)}
-                      sx={{ color: '#EF4444' }}
+                      sx={{ color: '#EF4444', p: { xs: 0.5, sm: 0.75 } }}
                     >
                       <Delete fontSize="small" />
                     </IconButton>
@@ -244,15 +287,31 @@ const SchoolYearsManager = ({ schoolYears, fetchSchoolYears, showMessage }) => {
         </Table>
       </TableContainer>
 
-      {/* Dialog para crear/editar año escolar */}
-      <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
-        <DialogTitle>
+      {/* Dialog Responsive */}
+      <Dialog 
+        open={openDialog} 
+        onClose={handleCloseDialog} 
+        maxWidth="sm" 
+        fullWidth
+        fullScreen={isMobile}
+        PaperProps={{
+          sx: {
+            borderRadius: { xs: 0, sm: '12px' },
+            m: { xs: 0, sm: 2 }
+          }
+        }}
+      >
+        <DialogTitle sx={{ 
+          fontSize: { xs: 18, sm: 20, md: 24 },
+          px: { xs: 2, sm: 3 },
+          pt: { xs: 2, sm: 2.5 }
+        }}>
           {editingYear ? 'Editar Año Escolar' : 'Nuevo Año Escolar'}
         </DialogTitle>
-        <DialogContent>
+        <DialogContent sx={{ px: { xs: 2, sm: 3 } }}>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
             {error && (
-              <Alert severity="error" onClose={() => setError('')} sx={{ borderRadius: '10px' }}>
+              <Alert severity="error" onClose={() => setError('')} sx={{ borderRadius: '10px', fontSize: { xs: 12, sm: 13 } }}>
                 {error}
               </Alert>
             )}
@@ -266,6 +325,10 @@ const SchoolYearsManager = ({ schoolYears, fetchSchoolYears, showMessage }) => {
               fullWidth
               size="small"
               placeholder="Ej: 2024, 2025"
+              sx={{
+                '& .MuiInputLabel-root': { fontSize: { xs: 12, sm: 13 } },
+                '& .MuiInputBase-root': { fontSize: { xs: 12, sm: 13 } }
+              }}
             />
             
             <TextField
@@ -278,6 +341,10 @@ const SchoolYearsManager = ({ schoolYears, fetchSchoolYears, showMessage }) => {
               fullWidth
               size="small"
               InputLabelProps={{ shrink: true }}
+              sx={{
+                '& .MuiInputLabel-root': { fontSize: { xs: 12, sm: 13 } },
+                '& .MuiInputBase-root': { fontSize: { xs: 12, sm: 13 } }
+              }}
             />
             
             <TextField
@@ -290,6 +357,10 @@ const SchoolYearsManager = ({ schoolYears, fetchSchoolYears, showMessage }) => {
               fullWidth
               size="small"
               InputLabelProps={{ shrink: true }}
+              sx={{
+                '& .MuiInputLabel-root': { fontSize: { xs: 12, sm: 13 } },
+                '& .MuiInputBase-root': { fontSize: { xs: 12, sm: 13 } }
+              }}
             />
             
             <FormControlLabel
@@ -301,17 +372,24 @@ const SchoolYearsManager = ({ schoolYears, fetchSchoolYears, showMessage }) => {
                 />
               }
               label="Activo (año escolar actual)"
+              sx={{
+                '& .MuiFormControlLabel-label': { fontSize: { xs: 12, sm: 13 } }
+              }}
             />
           </Box>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDialog}>Cancelar</Button>
+        <DialogActions sx={{ p: { xs: 2, sm: 2.5 }, pt: 0 }}>
+          <Button onClick={handleCloseDialog} sx={{ fontSize: { xs: 12, sm: 13 } }}>
+            Cancelar
+          </Button>
           <Button
             onClick={handleSubmit}
             variant="contained"
             sx={{
               background: 'linear-gradient(135deg, #1A1A2E 0%, #2D2B55 100%)',
-              '&:hover': { opacity: 0.9 }
+              '&:hover': { opacity: 0.9 },
+              fontSize: { xs: 12, sm: 13 },
+              px: { xs: 2, sm: 3 }
             }}
           >
             {editingYear ? 'Actualizar' : 'Crear'}
@@ -322,8 +400,11 @@ const SchoolYearsManager = ({ schoolYears, fetchSchoolYears, showMessage }) => {
   )
 }
 
-// Componente para gestionar periodos académicos
+// Componente para gestionar periodos académicos - Responsive
 const PeriodsManager = ({ schoolYears, showMessage }) => {
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
+  
   const [periods, setPeriods] = useState([])
   const [openDialog, setOpenDialog] = useState(false)
   const [editingPeriod, setEditingPeriod] = useState(null)
@@ -460,9 +541,21 @@ const PeriodsManager = ({ schoolYears, showMessage }) => {
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-        <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <CalendarMonth sx={{ fontSize: 20 }} />
+      <Box sx={{ 
+        display: 'flex', 
+        flexDirection: { xs: 'column', sm: 'row' },
+        justifyContent: 'space-between', 
+        alignItems: { xs: 'flex-start', sm: 'center' }, 
+        gap: { xs: 2, sm: 0 },
+        mb: 2 
+      }}>
+        <Typography variant="h6" sx={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: 1,
+          fontSize: { xs: 16, sm: 18, md: 20 }
+        }}>
+          <CalendarMonth sx={{ fontSize: { xs: 18, sm: 20 } }} />
           Periodos Académicos
         </Typography>
         <Button
@@ -470,20 +563,31 @@ const PeriodsManager = ({ schoolYears, showMessage }) => {
           startIcon={<Add />}
           onClick={() => handleOpenDialog()}
           size="small"
+          sx={{ 
+            fontSize: { xs: 11, sm: 12 },
+            px: { xs: 1.5, sm: 2 }
+          }}
         >
           Nuevo Periodo
         </Button>
       </Box>
 
-      <FormControl size="small" sx={{ minWidth: 200, mb: 2 }}>
-        <InputLabel>Año Escolar</InputLabel>
+      <FormControl 
+        size="small" 
+        sx={{ 
+          minWidth: { xs: '100%', sm: 200 }, 
+          mb: 2 
+        }}
+      >
+        <InputLabel sx={{ fontSize: { xs: 12, sm: 13 } }}>Año Escolar</InputLabel>
         <Select
           value={selectedSchoolYear}
           onChange={(e) => setSelectedSchoolYear(e.target.value)}
           label="Año Escolar"
+          sx={{ fontSize: { xs: 12, sm: 13 } }}
         >
           {schoolYears.map((year) => (
-            <MenuItem key={year.id} value={year.id}>
+            <MenuItem key={year.id} value={year.id} sx={{ fontSize: { xs: 12, sm: 13 } }}>
               {year.name} {year.is_active ? '(Activo)' : ''}
             </MenuItem>
           ))}
@@ -491,7 +595,11 @@ const PeriodsManager = ({ schoolYears, showMessage }) => {
       </FormControl>
 
       {currentSchoolYear && (
-        <Typography variant="body2" sx={{ color: '#AAA', mb: 2 }}>
+        <Typography variant="body2" sx={{ 
+          color: '#AAA', 
+          mb: 2,
+          fontSize: { xs: 11, sm: 12 }
+        }}>
           Gestionando periodos para {currentSchoolYear.name}
         </Typography>
       )}
@@ -501,39 +609,62 @@ const PeriodsManager = ({ schoolYears, showMessage }) => {
           <CircularProgress size={24} />
         </Box>
       ) : periods.length === 0 ? (
-        <Alert severity="info" sx={{ mt: 2 }}>
+        <Alert severity="info" sx={{ mt: 2, borderRadius: '10px', fontSize: { xs: 12, sm: 13 } }}>
           No hay periodos académicos configurados para este año escolar. 
           Haz clic en "Nuevo Periodo" para crear uno.
         </Alert>
       ) : (
-        <TableContainer component={Paper} sx={{ borderRadius: '12px' }}>
-          <Table size="small">
+        <TableContainer 
+          component={Paper} 
+          sx={{ 
+            borderRadius: '12px',
+            overflowX: 'auto'
+          }}
+        >
+          <Table size="small" sx={{ minWidth: isMobile ? 600 : 'auto' }}>
             <TableHead>
               <TableRow sx={{ background: '#F5F3EE' }}>
-                <TableCell sx={{ fontWeight: 600 }}>Nombre</TableCell>
-                <TableCell sx={{ fontWeight: 600 }}>Número</TableCell>
-                <TableCell sx={{ fontWeight: 600 }}>Fecha Inicio</TableCell>
-                <TableCell sx={{ fontWeight: 600 }}>Fecha Fin</TableCell>
-                <TableCell sx={{ fontWeight: 600 }}>Estado</TableCell>
-                <TableCell sx={{ fontWeight: 600 }}>Acciones</TableCell>
+                <TableCell sx={{ fontWeight: 600, fontSize: { xs: 12, sm: 13 } }}>Nombre</TableCell>
+                <TableCell sx={{ fontWeight: 600, fontSize: { xs: 12, sm: 13 } }}>#</TableCell>
+                <TableCell sx={{ fontWeight: 600, fontSize: { xs: 12, sm: 13 } }}>Fecha Inicio</TableCell>
+                {!isMobile && (
+                  <TableCell sx={{ fontWeight: 600, fontSize: { xs: 12, sm: 13 } }}>Fecha Fin</TableCell>
+                )}
+                <TableCell sx={{ fontWeight: 600, fontSize: { xs: 12, sm: 13 } }}>Estado</TableCell>
+                <TableCell sx={{ fontWeight: 600, fontSize: { xs: 12, sm: 13 } }}>Acciones</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {periods.map((period) => (
                 <TableRow key={period.id}>
                   <TableCell>
-                    <Typography sx={{ fontWeight: 500 }}>{period.name}</Typography>
+                    <Typography sx={{ 
+                      fontWeight: 500, 
+                      fontSize: { xs: 12, sm: 13 },
+                      wordBreak: 'break-word'
+                    }}>
+                      {period.name}
+                    </Typography>
                   </TableCell>
-                  <TableCell>{period.period_number}</TableCell>
-                  <TableCell>{period.start_date}</TableCell>
-                  <TableCell>{period.end_date}</TableCell>
+                  <TableCell sx={{ fontSize: { xs: 12, sm: 13 } }}>
+                    {period.period_number}
+                  </TableCell>
+                  <TableCell sx={{ fontSize: { xs: 12, sm: 13 } }}>
+                    {period.start_date}
+                  </TableCell>
+                  {!isMobile && (
+                    <TableCell sx={{ fontSize: { xs: 12, sm: 13 } }}>
+                      {period.end_date}
+                    </TableCell>
+                  )}
                   <TableCell>
                     <Chip
                       label={period.is_active ? 'Activo' : 'Inactivo'}
                       sx={{
                         backgroundColor: period.is_active ? '#10B98120' : '#EF444420',
                         color: period.is_active ? '#10B981' : '#EF4444',
-                        fontSize: 11
+                        fontSize: { xs: 10, sm: 11 },
+                        height: { xs: 24, sm: 32 }
                       }}
                     />
                   </TableCell>
@@ -541,7 +672,7 @@ const PeriodsManager = ({ schoolYears, showMessage }) => {
                     <IconButton 
                       size="small" 
                       onClick={() => handleOpenDialog(period)}
-                      sx={{ color: '#6C63FF' }}
+                      sx={{ color: '#6C63FF', p: { xs: 0.5, sm: 0.75 } }}
                     >
                       <Edit fontSize="small" />
                     </IconButton>
@@ -549,7 +680,7 @@ const PeriodsManager = ({ schoolYears, showMessage }) => {
                       <IconButton 
                         size="small" 
                         onClick={() => handleSetActive(period.id)}
-                        sx={{ color: '#10B981' }}
+                        sx={{ color: '#10B981', p: { xs: 0.5, sm: 0.75 } }}
                         title="Activar periodo"
                       >
                         <CheckCircle fontSize="small" />
@@ -558,7 +689,7 @@ const PeriodsManager = ({ schoolYears, showMessage }) => {
                     <IconButton 
                       size="small" 
                       onClick={() => handleDeletePeriod(period.id)}
-                      sx={{ color: '#EF4444' }}
+                      sx={{ color: '#EF4444', p: { xs: 0.5, sm: 0.75 } }}
                     >
                       <Delete fontSize="small" />
                     </IconButton>
@@ -570,14 +701,30 @@ const PeriodsManager = ({ schoolYears, showMessage }) => {
         </TableContainer>
       )}
 
-      <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
-        <DialogTitle>
+      <Dialog 
+        open={openDialog} 
+        onClose={handleCloseDialog} 
+        maxWidth="sm" 
+        fullWidth
+        fullScreen={isMobile}
+        PaperProps={{
+          sx: {
+            borderRadius: { xs: 0, sm: '12px' },
+            m: { xs: 0, sm: 2 }
+          }
+        }}
+      >
+        <DialogTitle sx={{ 
+          fontSize: { xs: 18, sm: 20, md: 24 },
+          px: { xs: 2, sm: 3 },
+          pt: { xs: 2, sm: 2.5 }
+        }}>
           {editingPeriod ? 'Editar Periodo Académico' : 'Nuevo Periodo Académico'}
         </DialogTitle>
-        <DialogContent>
+        <DialogContent sx={{ px: { xs: 2, sm: 3 } }}>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
             {error && (
-              <Alert severity="error" onClose={() => setError('')} sx={{ borderRadius: '10px' }}>
+              <Alert severity="error" onClose={() => setError('')} sx={{ borderRadius: '10px', fontSize: { xs: 12, sm: 13 } }}>
                 {error}
               </Alert>
             )}
@@ -591,6 +738,10 @@ const PeriodsManager = ({ schoolYears, showMessage }) => {
               fullWidth
               size="small"
               placeholder="Ej: Periodo 1, I Trimestre, etc."
+              sx={{
+                '& .MuiInputLabel-root': { fontSize: { xs: 12, sm: 13 } },
+                '& .MuiInputBase-root': { fontSize: { xs: 12, sm: 13 } }
+              }}
             />
             
             <TextField
@@ -604,6 +755,10 @@ const PeriodsManager = ({ schoolYears, showMessage }) => {
               size="small"
               inputProps={{ min: 1, max: 4 }}
               placeholder="1, 2, 3 o 4"
+              sx={{
+                '& .MuiInputLabel-root': { fontSize: { xs: 12, sm: 13 } },
+                '& .MuiInputBase-root': { fontSize: { xs: 12, sm: 13 } }
+              }}
             />
             
             <TextField
@@ -616,6 +771,10 @@ const PeriodsManager = ({ schoolYears, showMessage }) => {
               fullWidth
               size="small"
               InputLabelProps={{ shrink: true }}
+              sx={{
+                '& .MuiInputLabel-root': { fontSize: { xs: 12, sm: 13 } },
+                '& .MuiInputBase-root': { fontSize: { xs: 12, sm: 13 } }
+              }}
             />
             
             <TextField
@@ -628,6 +787,10 @@ const PeriodsManager = ({ schoolYears, showMessage }) => {
               fullWidth
               size="small"
               InputLabelProps={{ shrink: true }}
+              sx={{
+                '& .MuiInputLabel-root': { fontSize: { xs: 12, sm: 13 } },
+                '& .MuiInputBase-root': { fontSize: { xs: 12, sm: 13 } }
+              }}
             />
             
             <FormControlLabel
@@ -639,17 +802,24 @@ const PeriodsManager = ({ schoolYears, showMessage }) => {
                 />
               }
               label="Periodo activo (actual)"
+              sx={{
+                '& .MuiFormControlLabel-label': { fontSize: { xs: 12, sm: 13 } }
+              }}
             />
           </Box>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDialog}>Cancelar</Button>
+        <DialogActions sx={{ p: { xs: 2, sm: 2.5 }, pt: 0 }}>
+          <Button onClick={handleCloseDialog} sx={{ fontSize: { xs: 12, sm: 13 } }}>
+            Cancelar
+          </Button>
           <Button
             onClick={handleSubmit}
             variant="contained"
             sx={{
               background: 'linear-gradient(135deg, #1A1A2E 0%, #2D2B55 100%)',
-              '&:hover': { opacity: 0.9 }
+              '&:hover': { opacity: 0.9 },
+              fontSize: { xs: 12, sm: 13 },
+              px: { xs: 2, sm: 3 }
             }}
           >
             {editingPeriod ? 'Actualizar' : 'Crear'}
@@ -660,9 +830,12 @@ const PeriodsManager = ({ schoolYears, showMessage }) => {
   )
 }
 
-// Componente principal de configuración
+// Componente principal de configuración - Responsive
 const AdminSettings = () => {
   const navigate = useNavigate()
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
+  
   const { settings: contextSettings, updateSettings, loading: settingsLoading } = useSettings()
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -758,41 +931,91 @@ const AdminSettings = () => {
   }
 
   return (
-    <Box sx={{ p: 3, maxWidth: 1000, mx: 'auto' }}>
-      {/* Header */}
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
+    <Box sx={{ 
+      p: { xs: 1.5, sm: 2, md: 3 },
+      maxWidth: { xs: '100%', sm: '95%', md: 1000 },
+      width: '100%',
+      mx: 'auto',
+      overflowX: 'hidden'
+    }}>
+      {/* Header Responsive */}
+      <Box sx={{ 
+        display: 'flex', 
+        flexDirection: { xs: 'column', sm: 'row' },
+        alignItems: { xs: 'flex-start', sm: 'center' }, 
+        gap: { xs: 2, sm: 2 },
+        mb: { xs: 2, sm: 3 }
+      }}>
         <Button 
           variant="outlined" 
           onClick={() => navigate('/admin')}
           startIcon={<ArrowBack />}
-          sx={{ borderRadius: '8px' }}
+          sx={{ 
+            borderRadius: '8px',
+            px: { xs: 1.5, sm: 2 },
+            py: { xs: 0.5, sm: 0.75 },
+            fontSize: { xs: 12, sm: 13 }
+          }}
         >
           Volver
         </Button>
-        <Typography variant="h4" sx={{ fontFamily: '"Instrument Serif", serif' }}>
+        <Typography 
+          variant="h4" 
+          sx={{ 
+            fontFamily: '"Instrument Serif", serif',
+            fontSize: { xs: 20, sm: 28, md: 32 }
+          }}
+        >
           Configuración del Sistema
         </Typography>
       </Box>
 
-      <Paper sx={{ borderRadius: '14px', border: '0.5px solid #E0DDD8', overflow: 'hidden' }}>
-        <Tabs value={tabValue} onChange={handleTabChange} sx={{ borderBottom: '1px solid #E0DDD8', px: 2 }}>
+      <Paper sx={{ 
+        borderRadius: '14px', 
+        border: '0.5px solid #E0DDD8', 
+        overflow: 'hidden' 
+      }}>
+        <Tabs 
+          value={tabValue} 
+          onChange={handleTabChange} 
+          sx={{ 
+            borderBottom: '1px solid #E0DDD8', 
+            px: { xs: 1, sm: 2 },
+            '& .MuiTab-root': {
+              fontSize: { xs: 12, sm: 13 },
+              minWidth: { xs: 'auto', sm: 100 },
+              px: { xs: 1.5, sm: 2 }
+            }
+          }}
+          variant={isMobile ? "fullWidth" : "standard"}
+        >
           <Tab icon={<Settings />} label="General" />
-          <Tab icon={<School />} label="Años Escolares" />
+          <Tab icon={<School />} label="Años" />
           <Tab icon={<CalendarMonth />} label="Periodos" />
         </Tabs>
 
-        <Box sx={{ p: 3 }}>
+        <Box sx={{ p: { xs: 2, sm: 3 } }}>
           {error && (
-            <Alert severity="error" onClose={() => setError('')} sx={{ mb: 2, borderRadius: '10px' }}>
+            <Alert 
+              severity="error" 
+              onClose={() => setError('')} 
+              sx={{ mb: 2, borderRadius: '10px', fontSize: { xs: 12, sm: 13 } }}
+            >
               {error}
             </Alert>
           )}
 
-          {/* Pestaña General */}
+          {/* Pestaña General - Responsive */}
           {tabValue === 0 && (
             <Box>
-              <Typography variant="h6" sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Settings sx={{ fontSize: 20 }} />
+              <Typography variant="h6" sx={{ 
+                mb: 2, 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: 1,
+                fontSize: { xs: 16, sm: 18, md: 20 }
+              }}>
+                <Settings sx={{ fontSize: { xs: 18, sm: 20 } }} />
                 Información Institucional
               </Typography>
               
@@ -804,6 +1027,10 @@ const AdminSettings = () => {
                   onChange={handleSettingChange}
                   fullWidth
                   size="small"
+                  sx={{
+                    '& .MuiInputLabel-root': { fontSize: { xs: 12, sm: 13 } },
+                    '& .MuiInputBase-root': { fontSize: { xs: 12, sm: 13 } }
+                  }}
                 />
                 
                 <TextField
@@ -813,6 +1040,10 @@ const AdminSettings = () => {
                   onChange={handleSettingChange}
                   fullWidth
                   size="small"
+                  sx={{
+                    '& .MuiInputLabel-root': { fontSize: { xs: 12, sm: 13 } },
+                    '& .MuiInputBase-root': { fontSize: { xs: 12, sm: 13 } }
+                  }}
                 />
                 
                 <TextField
@@ -822,6 +1053,10 @@ const AdminSettings = () => {
                   onChange={handleSettingChange}
                   fullWidth
                   size="small"
+                  sx={{
+                    '& .MuiInputLabel-root': { fontSize: { xs: 12, sm: 13 } },
+                    '& .MuiInputBase-root': { fontSize: { xs: 12, sm: 13 } }
+                  }}
                 />
                 
                 <TextField
@@ -832,12 +1067,19 @@ const AdminSettings = () => {
                   fullWidth
                   size="small"
                   type="email"
+                  sx={{
+                    '& .MuiInputLabel-root': { fontSize: { xs: 12, sm: 13 } },
+                    '& .MuiInputBase-root': { fontSize: { xs: 12, sm: 13 } }
+                  }}
                 />
               </Box>
 
               <Divider sx={{ my: 3 }} />
 
-              <Typography variant="h6" sx={{ mb: 2 }}>
+              <Typography variant="h6" sx={{ 
+                mb: 2,
+                fontSize: { xs: 16, sm: 18, md: 20 }
+              }}>
                 Permisos del Sistema
               </Typography>
               
@@ -851,6 +1093,9 @@ const AdminSettings = () => {
                     />
                   }
                   label="Permitir registro de nuevos usuarios"
+                  sx={{
+                    '& .MuiFormControlLabel-label': { fontSize: { xs: 12, sm: 13 } }
+                  }}
                 />
                 
                 <FormControlLabel
@@ -862,28 +1107,38 @@ const AdminSettings = () => {
                     />
                   }
                   label="Permitir edición de calificaciones"
+                  sx={{
+                    '& .MuiFormControlLabel-label': { fontSize: { xs: 12, sm: 13 } }
+                  }}
                 />
               </Box>
 
               <Divider sx={{ my: 3 }} />
 
-              <Typography variant="h6" sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Scoreboard sx={{ fontSize: 20 }} />
+              <Typography variant="h6" sx={{ 
+                mb: 2, 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: 1,
+                fontSize: { xs: 16, sm: 18, md: 20 }
+              }}>
+                <Scoreboard sx={{ fontSize: { xs: 18, sm: 20 } }} />
                 Configuración Académica
               </Typography>
 
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                 <FormControl fullWidth size="small">
-                  <InputLabel>Escala de Calificación</InputLabel>
+                  <InputLabel sx={{ fontSize: { xs: 12, sm: 13 } }}>Escala de Calificación</InputLabel>
                   <Select
                     name="grading_scale"
                     value={localSettings.grading_scale || '100'}
                     onChange={handleSettingChange}
                     label="Escala de Calificación"
+                    sx={{ fontSize: { xs: 12, sm: 13 } }}
                   >
-                    <MenuItem value="100">0 - 100 (Mínimo 60 para aprobar)</MenuItem>
-                    <MenuItem value="10">1 - 10 (Mínimo 6.0 para aprobar)</MenuItem>
-                    <MenuItem value="5">1 - 5 (Mínimo 3.0 para aprobar)</MenuItem>
+                    <MenuItem value="100" sx={{ fontSize: { xs: 12, sm: 13 } }}>0 - 100 (Mínimo 60 para aprobar)</MenuItem>
+                    <MenuItem value="10" sx={{ fontSize: { xs: 12, sm: 13 } }}>1 - 10 (Mínimo 6.0 para aprobar)</MenuItem>
+                    <MenuItem value="5" sx={{ fontSize: { xs: 12, sm: 13 } }}>1 - 5 (Mínimo 3.0 para aprobar)</MenuItem>
                   </Select>
                 </FormControl>
                 
@@ -901,17 +1156,26 @@ const AdminSettings = () => {
                     min: 0,
                     max: getMaxScore()
                   }}
+                  sx={{
+                    '& .MuiInputLabel-root': { fontSize: { xs: 12, sm: 13 } },
+                    '& .MuiInputBase-root': { fontSize: { xs: 12, sm: 13 } },
+                    '& .MuiFormHelperText-root': { fontSize: { xs: 10, sm: 11 } }
+                  }}
                 />
 
-                <Alert severity="info" sx={{ mt: 1 }}>
-                  <Typography variant="body2">
+                <Alert severity="info" sx={{ mt: 1, borderRadius: '10px' }}>
+                  <Typography variant="body2" sx={{ fontSize: { xs: 11, sm: 12 } }}>
                     <strong>Nota máxima:</strong> {getMaxScore()} puntos<br/>
                     <strong>Nota mínima aprobatoria:</strong> {localSettings.min_grade || 60} puntos
                   </Typography>
                 </Alert>
               </Box>
 
-              <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 3 }}>
+              <Box sx={{ 
+                display: 'flex', 
+                justifyContent: { xs: 'center', sm: 'flex-end' }, 
+                mt: 3 
+              }}>
                 <Button
                   variant="contained"
                   onClick={handleSaveSettings}
@@ -921,7 +1185,11 @@ const AdminSettings = () => {
                     background: 'linear-gradient(135deg, #1A1A2E 0%, #2D2B55 100%)',
                     '&:hover': { opacity: 0.9 },
                     borderRadius: '10px',
-                    textTransform: 'none'
+                    textTransform: 'none',
+                    fontSize: { xs: 12, sm: 13 },
+                    px: { xs: 3, sm: 4 },
+                    py: { xs: 0.75, sm: 1 },
+                    width: { xs: '100%', sm: 'auto' }
                   }}
                 >
                   {saving ? 'Guardando...' : 'Guardar Configuración'}
@@ -955,7 +1223,11 @@ const AdminSettings = () => {
         onClose={() => setSuccess('')}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
-        <Alert severity="success" onClose={() => setSuccess('')} sx={{ borderRadius: '10px' }}>
+        <Alert 
+          severity="success" 
+          onClose={() => setSuccess('')} 
+          sx={{ borderRadius: '10px', fontSize: { xs: 12, sm: 13 } }}
+        >
           {success}
         </Alert>
       </Snackbar>

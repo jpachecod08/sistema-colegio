@@ -1,6 +1,12 @@
 import React, { useState } from 'react'
-import { Drawer, List, ListItem, ListItemIcon, ListItemText, Box, Toolbar, Divider, Typography, Collapse } from '@mui/material'
+import { 
+  Drawer, List, ListItem, ListItemIcon, ListItemText, Box, 
+  Toolbar, Divider, Typography, Collapse, IconButton, 
+  useMediaQuery, useTheme, SwipeableDrawer
+} from '@mui/material'
 import { useNavigate, useLocation } from 'react-router-dom'
+import MenuIcon from '@mui/icons-material/Menu'
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import DashboardIcon from '@mui/icons-material/Dashboard'
 import GradeIcon from '@mui/icons-material/Grade'
 import EventNoteIcon from '@mui/icons-material/EventNote'
@@ -17,11 +23,18 @@ import ExpandMore from '@mui/icons-material/ExpandMore'
 import { useAuth } from '../../context/AuthContext'
 
 const drawerWidth = 280
+const miniDrawerWidth = 72
 
 const Sidebar = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const { user } = useAuth()
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
+  const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'))
+  
+  const [mobileOpen, setMobileOpen] = useState(false)
+  const [isCollapsed, setIsCollapsed] = useState(false)
   
   // Estado para secciones colapsables
   const [openSections, setOpenSections] = useState({
@@ -37,6 +50,14 @@ const Sidebar = () => {
       ...prev,
       [section]: !prev[section]
     }))
+  }
+
+  const handleDrawerToggle = () => {
+    setMobileOpen(!mobileOpen)
+  }
+
+  const handleDrawerCollapse = () => {
+    setIsCollapsed(!isCollapsed)
   }
 
   const getMenuItems = () => {
@@ -57,7 +78,7 @@ const Sidebar = () => {
             icon: <PeopleIcon />,
             items: [
               { text: 'Usuarios', icon: <PeopleIcon />, path: '/admin/users', desc: 'Gestionar usuarios del sistema' },
-              { text: 'Clases (Grados)', icon: <ClassIcon />, path: '/admin/classes', desc: 'Administrar grados y niveles' },
+              { text: 'Clases', icon: <ClassIcon />, path: '/admin/classes', desc: 'Administrar grados y niveles' },
               { text: 'Materias', icon: <SchoolIcon />, path: '/admin/subjects', desc: 'Gestionar asignaturas' },
               { text: 'Asignaciones', icon: <AssignmentIcon />, path: '/admin/assignments', desc: 'Asignar profesores a clases' },
               { text: 'Matrículas', icon: <SchoolIcon />, path: '/admin/enrollments', desc: 'Matricular estudiantes' },
@@ -166,12 +187,40 @@ const Sidebar = () => {
   }
 
   const menuData = getMenuItems()
-  const isAdmin = user?.role === 'admin'
+
+  // Determinar el ancho del drawer basado en el estado
+  const currentDrawerWidth = isCollapsed && !isMobile && !isTablet ? miniDrawerWidth : drawerWidth
 
   const renderSection = (section) => {
     if (!section.items || section.items.length === 0) return null
     
     const isOpen = openSections[section.id] !== false
+    const isCollapsedMode = isCollapsed && !isMobile && !isTablet
+    
+    // Si está colapsado, solo mostrar el icono en la cabecera
+    if (isCollapsedMode) {
+      return (
+        <Box sx={{ mb: 1 }}>
+          <ListItem
+            onClick={() => handleSectionClick(section.id)}
+            sx={{
+              px: 1,
+              py: 1,
+              justifyContent: 'center',
+              cursor: 'pointer',
+              '&:hover': {
+                backgroundColor: '#F5F3EE',
+              }
+            }}
+            title={section.title}
+          >
+            <ListItemIcon sx={{ minWidth: 'auto', color: '#6C63FF' }}>
+              {section.icon}
+            </ListItemIcon>
+          </ListItem>
+        </Box>
+      )
+    }
     
     return (
       <Box sx={{ mb: 1 }}>
@@ -193,7 +242,7 @@ const Sidebar = () => {
           <ListItemText 
             primary={section.title}
             primaryTypographyProps={{
-              fontSize: 12,
+              fontSize: { xs: 10, sm: 11, md: 12 },
               fontWeight: 600,
               letterSpacing: '0.05em',
               color: '#888'
@@ -204,18 +253,21 @@ const Sidebar = () => {
         
         {/* Items de la sección */}
         <Collapse in={isOpen} timeout="auto" unmountOnExit>
-          <List sx={{ py: 0, pl: 2 }}>
+          <List sx={{ py: 0, pl: { xs: 1, sm: 2 } }}>
             {section.items.map((item) => (
               <ListItem
                 key={item.text}
-                onClick={() => navigate(item.path)}
+                onClick={() => {
+                  navigate(item.path)
+                  if (isMobile) setMobileOpen(false)
+                }}
                 selected={location.pathname === item.path || location.pathname.startsWith(item.path + '/')}
                 sx={{ 
                   cursor: 'pointer',
                   borderRadius: '10px',
                   mx: 1,
                   mb: 0.5,
-                  py: 0.75,
+                  py: { xs: 0.5, sm: 0.75 },
                   transition: 'all 0.2s',
                   '&.Mui-selected': {
                     backgroundColor: '#6C63FF12',
@@ -234,19 +286,19 @@ const Sidebar = () => {
               >
                 <ListItemIcon sx={{ 
                   color: location.pathname === item.path || location.pathname.startsWith(item.path + '/') ? '#6C63FF' : '#AAA',
-                  minWidth: 36
+                  minWidth: { xs: 32, sm: 36 }
                 }}>
                   {item.icon}
                 </ListItemIcon>
                 <ListItemText 
                   primary={item.text} 
-                  secondary={item.desc}
+                  secondary={!isMobile ? item.desc : null}
                   primaryTypographyProps={{ 
-                    fontSize: 13,
+                    fontSize: { xs: 12, sm: 12.5, md: 13 },
                     fontWeight: location.pathname === item.path || location.pathname.startsWith(item.path + '/') ? 600 : 400
                   }}
                   secondaryTypographyProps={{
-                    fontSize: 10,
+                    fontSize: { xs: 9, sm: 10 },
                     color: '#AAA',
                     sx: { mt: 0.25 }
                   }}
@@ -259,30 +311,111 @@ const Sidebar = () => {
     )
   }
 
+  const drawerContent = (
+    <Box sx={{ 
+      overflow: 'auto', 
+      py: 2,
+      height: '100%',
+      display: 'flex',
+      flexDirection: 'column'
+    }}>
+      {/* Header con botón de colapso (solo para desktop) */}
+      {!isMobile && (
+        <Box sx={{ 
+          display: 'flex', 
+          justifyContent: 'flex-end', 
+          px: 1, 
+          mb: 1,
+          borderBottom: '1px solid #F0EDE8',
+          pb: 1
+        }}>
+          <IconButton onClick={handleDrawerCollapse} size="small">
+            {isCollapsed ? <MenuIcon /> : <ChevronLeftIcon />}
+          </IconButton>
+        </Box>
+      )}
+      
+      {/* Secciones del menú */}
+      {menuData.sections.map((section, index) => (
+        <React.Fragment key={section.id}>
+          {renderSection(section)}
+          {index < menuData.sections.length - 1 && !(isCollapsed && !isMobile && !isTablet) && <Divider sx={{ my: 1, mx: 2 }} />}
+        </React.Fragment>
+      ))}
+    </Box>
+  )
+
+  // En móvil, usar SwipeableDrawer temporal
+  if (isMobile) {
+    return (
+      <>
+        {/* Botón de menú para móvil */}
+        <IconButton
+          color="inherit"
+          aria-label="open drawer"
+          edge="start"
+          onClick={handleDrawerToggle}
+          sx={{
+            position: 'fixed',
+            top: 12,
+            left: 12,
+            zIndex: 1100,
+            backgroundColor: '#fff',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+            '&:hover': { backgroundColor: '#f5f5f5' }
+          }}
+        >
+          <MenuIcon />
+        </IconButton>
+        
+        <SwipeableDrawer
+          anchor="left"
+          open={mobileOpen}
+          onClose={handleDrawerToggle}
+          onOpen={() => {}}
+          sx={{
+            '& .MuiDrawer-paper': {
+              width: drawerWidth,
+              boxSizing: 'border-box',
+              border: 'none',
+              background: '#fff',
+            },
+          }}
+        >
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', p: 1 }}>
+            <IconButton onClick={handleDrawerToggle}>
+              <ChevronLeftIcon />
+            </IconButton>
+          </Box>
+          {drawerContent}
+        </SwipeableDrawer>
+      </>
+    )
+  }
+
+  // En tablet y desktop, usar Drawer permanente con opción de colapso
   return (
     <Drawer
       variant="permanent"
       sx={{
-        width: drawerWidth,
+        width: currentDrawerWidth,
         flexShrink: 0,
         [`& .MuiDrawer-paper`]: { 
-          width: drawerWidth, 
+          width: currentDrawerWidth, 
           boxSizing: 'border-box',
           border: 'none',
           background: '#fff',
-          boxShadow: '1px 0 0 0 rgba(0,0,0,0.05)'
+          boxShadow: '1px 0 0 0 rgba(0,0,0,0.05)',
+          transition: theme.transitions.create('width', {
+            easing: theme.transitions.easing.sharp,
+            duration: theme.transitions.duration.enteringScreen,
+          }),
+          overflowX: 'hidden',
         },
       }}
     >
       <Toolbar />
-      <Box sx={{ overflow: 'auto', py: 2 }}>
-        {menuData.sections.map((section, index) => (
-          <React.Fragment key={section.id}>
-            {renderSection(section)}
-            {index < menuData.sections.length - 1 && <Divider sx={{ my: 1, mx: 2 }} />}
-          </React.Fragment>
-        ))}
-      </Box>
+      {drawerContent}
     </Drawer>
   )
 }

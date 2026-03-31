@@ -21,13 +21,19 @@ import {
   Chip,
   IconButton,
   Snackbar,
-  CircularProgress
+  CircularProgress,
+  useMediaQuery,
+  useTheme
 } from '@mui/material'
 import { Add, Edit, Delete, ArrowBack, School } from '@mui/icons-material'
 import api from '../../services/api'
 
 const AdminSubjects = () => {
   const navigate = useNavigate()
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
+  const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'))
+  
   const [subjects, setSubjects] = useState([])
   const [loading, setLoading] = useState(true)
   const [openDialog, setOpenDialog] = useState(false)
@@ -149,18 +155,46 @@ const AdminSubjects = () => {
   }
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+    <Box sx={{ 
+      p: { xs: 1.5, sm: 2, md: 3 },
+      maxWidth: '100%',
+      overflowX: 'hidden'
+    }}>
+      {/* Header Responsive */}
+      <Box sx={{ 
+        display: 'flex', 
+        flexDirection: { xs: 'column', sm: 'row' },
+        justifyContent: 'space-between', 
+        alignItems: { xs: 'flex-start', sm: 'center' }, 
+        gap: { xs: 2, sm: 0 },
+        mb: { xs: 2, sm: 3 }
+      }}>
+        <Box sx={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: { xs: 1, sm: 2 },
+          flexWrap: 'wrap'
+        }}>
           <Button 
             variant="outlined" 
             onClick={() => navigate('/admin')}
             startIcon={<ArrowBack />}
-            sx={{ borderRadius: '8px' }}
+            sx={{ 
+              borderRadius: '8px',
+              px: { xs: 1.5, sm: 2 },
+              py: { xs: 0.5, sm: 0.75 },
+              fontSize: { xs: 12, sm: 13 }
+            }}
           >
             Volver
           </Button>
-          <Typography variant="h4" sx={{ fontFamily: '"Instrument Serif", serif' }}>
+          <Typography 
+            variant="h4" 
+            sx={{ 
+              fontFamily: '"Instrument Serif", serif',
+              fontSize: { xs: 20, sm: 28, md: 32 }
+            }}
+          >
             Gestión de Materias
           </Typography>
         </Box>
@@ -172,36 +206,50 @@ const AdminSubjects = () => {
             background: 'linear-gradient(135deg, #1A1A2E 0%, #2D2B55 100%)',
             '&:hover': { opacity: 0.9 },
             borderRadius: '10px',
-            textTransform: 'none'
+            textTransform: 'none',
+            px: { xs: 2, sm: 3 },
+            py: { xs: 0.75, sm: 1 },
+            fontSize: { xs: 12, sm: 13 },
+            width: { xs: '100%', sm: 'auto' }
           }}
         >
           Nueva Materia
         </Button>
       </Box>
 
-      <TableContainer component={Paper} sx={{ borderRadius: '14px', border: '0.5px solid #E0DDD8' }}>
-        <Table>
+      {/* Tabla de materias - Responsive con scroll horizontal */}
+      <TableContainer 
+        component={Paper} 
+        sx={{ 
+          borderRadius: '14px', 
+          border: '0.5px solid #E0DDD8',
+          overflowX: 'auto'
+        }}
+      >
+        <Table sx={{ minWidth: isMobile ? 500 : 'auto' }}>
           <TableHead>
             <TableRow sx={{ background: '#F5F3EE' }}>
-              <TableCell sx={{ fontWeight: 600 }}>Código</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>Nombre</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>Descripción</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>Acciones</TableCell>
+              <TableCell sx={{ fontWeight: 600, fontSize: { xs: 12, sm: 13 } }}>Código</TableCell>
+              <TableCell sx={{ fontWeight: 600, fontSize: { xs: 12, sm: 13 } }}>Nombre</TableCell>
+              {!isMobile && (
+                <TableCell sx={{ fontWeight: 600, fontSize: { xs: 12, sm: 13 } }}>Descripción</TableCell>
+              )}
+              <TableCell sx={{ fontWeight: 600, fontSize: { xs: 12, sm: 13 } }}>Acciones</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {subjects.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={4} align="center">
-                  <Box sx={{ py: 4, textAlign: 'center' }}>
-                    <School sx={{ fontSize: 48, color: '#CCC', mb: 1 }} />
-                    <Typography sx={{ color: '#AAA' }}>
+                <TableCell colSpan={isMobile ? 3 : 4} align="center">
+                  <Box sx={{ py: { xs: 3, sm: 4 }, textAlign: 'center' }}>
+                    <School sx={{ fontSize: { xs: 36, sm: 48 }, color: '#CCC', mb: 1 }} />
+                    <Typography sx={{ color: '#AAA', fontSize: { xs: 12, sm: 13 } }}>
                       No hay materias registradas
                     </Typography>
                     <Button
                       variant="outlined"
                       onClick={() => handleOpenDialog()}
-                      sx={{ mt: 2 }}
+                      sx={{ mt: 2, fontSize: { xs: 11, sm: 12 } }}
                     >
                       Crear primera materia
                     </Button>
@@ -215,25 +263,41 @@ const AdminSubjects = () => {
                     <Chip
                       label={subject.code}
                       size="small"
-                      sx={{ backgroundColor: '#6C63FF20', color: '#6C63FF', fontWeight: 500 }}
+                      sx={{ 
+                        backgroundColor: '#6C63FF20', 
+                        color: '#6C63FF', 
+                        fontWeight: 500,
+                        fontSize: { xs: 10, sm: 11 },
+                        height: { xs: 24, sm: 32 }
+                      }}
                     />
                   </TableCell>
                   <TableCell>
-                    <Typography sx={{ fontWeight: 500 }}>{subject.name}</Typography>
+                    <Typography sx={{ 
+                      fontWeight: 500, 
+                      fontSize: { xs: 12, sm: 13 },
+                      wordBreak: 'break-word'
+                    }}>
+                      {subject.name}
+                    </Typography>
                   </TableCell>
-                  <TableCell>{subject.description || '—'}</TableCell>
+                  {!isMobile && (
+                    <TableCell sx={{ fontSize: { xs: 12, sm: 13 } }}>
+                      {subject.description || '—'}
+                    </TableCell>
+                  )}
                   <TableCell>
                     <IconButton 
                       size="small" 
                       onClick={() => handleOpenDialog(subject)}
-                      sx={{ color: '#6C63FF' }}
+                      sx={{ color: '#6C63FF', p: { xs: 0.5, sm: 0.75 } }}
                     >
                       <Edit fontSize="small" />
                     </IconButton>
                     <IconButton 
                       size="small" 
                       onClick={() => handleDeleteSubject(subject.id)}
-                      sx={{ color: '#EF4444' }}
+                      sx={{ color: '#EF4444', p: { xs: 0.5, sm: 0.75 } }}
                     >
                       <Delete fontSize="small" />
                     </IconButton>
@@ -245,14 +309,32 @@ const AdminSubjects = () => {
         </Table>
       </TableContainer>
 
-      <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
-        <DialogTitle sx={{ fontFamily: '"Instrument Serif", serif', fontSize: 24 }}>
+      {/* Dialog Responsive */}
+      <Dialog 
+        open={openDialog} 
+        onClose={handleCloseDialog} 
+        maxWidth="sm" 
+        fullWidth
+        fullScreen={isMobile}
+        PaperProps={{
+          sx: {
+            borderRadius: { xs: 0, sm: '12px' },
+            m: { xs: 0, sm: 2 }
+          }
+        }}
+      >
+        <DialogTitle sx={{ 
+          fontFamily: '"Instrument Serif", serif', 
+          fontSize: { xs: 20, sm: 24 },
+          px: { xs: 2, sm: 3 },
+          pt: { xs: 2, sm: 2.5 }
+        }}>
           {editingSubject ? 'Editar Materia' : 'Nueva Materia'}
         </DialogTitle>
-        <DialogContent>
+        <DialogContent sx={{ px: { xs: 2, sm: 3 } }}>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
             {error && (
-              <Alert severity="error" onClose={() => setError('')} sx={{ borderRadius: '10px' }}>
+              <Alert severity="error" onClose={() => setError('')} sx={{ borderRadius: '10px', fontSize: { xs: 12, sm: 13 } }}>
                 {error}
               </Alert>
             )}
@@ -267,6 +349,11 @@ const AdminSubjects = () => {
               size="small"
               placeholder="Ej: MAT101, LENG01"
               helperText="Código único para la materia"
+              sx={{
+                '& .MuiInputLabel-root': { fontSize: { xs: 12, sm: 13 } },
+                '& .MuiInputBase-root': { fontSize: { xs: 12, sm: 13 } },
+                '& .MuiFormHelperText-root': { fontSize: { xs: 10, sm: 11 } }
+              }}
             />
             
             <TextField
@@ -278,6 +365,10 @@ const AdminSubjects = () => {
               fullWidth
               size="small"
               placeholder="Ej: Matemáticas, Lengua Castellana"
+              sx={{
+                '& .MuiInputLabel-root': { fontSize: { xs: 12, sm: 13 } },
+                '& .MuiInputBase-root': { fontSize: { xs: 12, sm: 13 } }
+              }}
             />
             
             <TextField
@@ -290,17 +381,25 @@ const AdminSubjects = () => {
               rows={2}
               size="small"
               placeholder="Descripción opcional de la materia"
+              sx={{
+                '& .MuiInputLabel-root': { fontSize: { xs: 12, sm: 13 } },
+                '& .MuiInputBase-root': { fontSize: { xs: 12, sm: 13 } }
+              }}
             />
           </Box>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDialog}>Cancelar</Button>
+        <DialogActions sx={{ p: { xs: 2, sm: 2.5 }, pt: 0 }}>
+          <Button onClick={handleCloseDialog} sx={{ fontSize: { xs: 12, sm: 13 } }}>
+            Cancelar
+          </Button>
           <Button
             onClick={handleSubmit}
             variant="contained"
             sx={{
               background: 'linear-gradient(135deg, #1A1A2E 0%, #2D2B55 100%)',
-              '&:hover': { opacity: 0.9 }
+              '&:hover': { opacity: 0.9 },
+              fontSize: { xs: 12, sm: 13 },
+              px: { xs: 2, sm: 3 }
             }}
           >
             {editingSubject ? 'Actualizar' : 'Crear'}
@@ -314,7 +413,11 @@ const AdminSubjects = () => {
         onClose={() => setSuccess('')}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
-        <Alert severity="success" onClose={() => setSuccess('')} sx={{ borderRadius: '10px' }}>
+        <Alert 
+          severity="success" 
+          onClose={() => setSuccess('')} 
+          sx={{ borderRadius: '10px', fontSize: { xs: 12, sm: 13 } }}
+        >
           {success}
         </Alert>
       </Snackbar>
